@@ -3,6 +3,7 @@
 [1] Zilic, Josip, Atakan Aral, and Ivona Brandic. "EFPO: Energy efficient and failure predictive edge offloading."
     Proceedings of the 12th IEEE/ACM International Conference on Utility and Cloud Computing. 2019.
 """
+
 # EdgeSimPy components
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.network_link import NetworkLink
@@ -54,9 +55,7 @@ def partially_connected_hexagonal_mesh(network_nodes: list, link_specifications:
     # Checking if the number of link specifications is equal to the number of links in the network topology
     links_with_missing_specs = sum([spec["number_of_objects"] for spec in link_specifications]) != len(topology.edges())
     if links_with_missing_specs:
-        raise Exception(
-            f"You must specify the properties for {len(topology.edges())} links or ignore the 'link_specifications' parameter."
-        )
+        raise Exception(f"You must specify the properties for {len(topology.edges())} links or ignore the 'link_specifications' parameter.")
 
     # Applying the user-specified attributes to the network links
     links = (link for link in random.sample(NetworkLink.all(), NetworkLink.count()))
@@ -85,10 +84,6 @@ def find_neighbors_hexagonal_grid(map_coordinates: list, current_position: tuple
 
     candidates = [(x - 2, y), (x - 1, y + 1), (x + 1, y + 1), (x + 2, y), (x + 1, y - 1), (x - 1, y - 1)]
 
-    neighbors = [
-        neighbor
-        for neighbor in candidates
-        if neighbor[0] >= 0 and neighbor[1] >= 0 and (neighbor[0], neighbor[1]) in map_coordinates
-    ]
+    neighbors = [neighbor for neighbor in candidates if neighbor[0] >= 0 and neighbor[1] >= 0 and (neighbor[0], neighbor[1]) in map_coordinates]
 
     return neighbors

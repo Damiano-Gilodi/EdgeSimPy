@@ -1,4 +1,5 @@
-""" Contains all the simulation management functionality."""
+"""Contains all the simulation management functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components import *
@@ -77,9 +78,7 @@ class Simulator(ComponentManager, Model):
         if seconds + microseconds + milliseconds + minutes == 0:
             raise Exception("Tick duration attribute must be greater than zero.")
 
-        self.tick_duration = timedelta(
-            seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes
-        ).total_seconds()
+        self.tick_duration = timedelta(seconds=seconds, microseconds=microseconds, milliseconds=milliseconds, minutes=minutes).total_seconds()
 
         # Simulation metrics
         self.model_metrics = {}
@@ -190,11 +189,7 @@ class Simulator(ComponentManager, Model):
                 elif type(value) == list:
                     attribute_values = []
                     for item in value:
-                        obj = (
-                            globals()[item["class"]].find_by_id(item["id"])
-                            if type(item) == dict and "class" in item and item["class"] in globals()
-                            else None
-                        )
+                        obj = globals()[item["class"]].find_by_id(item["id"]) if type(item) == dict and "class" in item and item["class"] in globals() else None
 
                         if obj == None:
                             raise Exception(f"List relationship '{key}' of component {component} has an invalid item: {item}.")
@@ -206,9 +201,7 @@ class Simulator(ComponentManager, Model):
                 # Defining attributes that reference a single component (e.g., an edge server, an user, etc.)
                 elif type(value) == dict and "class" in value and "id" in value:
                     obj = (
-                        globals()[value["class"]].find_by_id(value["id"])
-                        if type(value) == dict and "class" in value and value["class"] in globals()
-                        else None
+                        globals()[value["class"]].find_by_id(value["id"]) if type(value) == dict and "class" in value and value["class"] in globals() else None
                     )
 
                     if obj == None:
@@ -217,16 +210,12 @@ class Simulator(ComponentManager, Model):
                     setattr(component, f"{key}", obj)
 
                 # Defining attributes that reference a a dictionary of components (e.g., {"1": {"class": "A", "id": 1}} )
-                elif type(value) == dict and all(
-                    type(entry) == dict and "class" in entry and "id" in entry for entry in value.values()
-                ):
+                elif type(value) == dict and all(type(entry) == dict and "class" in entry and "id" in entry for entry in value.values()):
                     attribute = {}
                     for k, v in value.items():
                         obj = globals()[v["class"]].find_by_id(v["id"]) if "class" in v and v["class"] in globals() else None
                         if obj == None:
-                            raise Exception(
-                                f"Relationship '{key}' of component {component} references an invalid object: {value}."
-                            )
+                            raise Exception(f"Relationship '{key}' of component {component} references an invalid object: {value}.")
                         attribute[k] = obj
 
                     setattr(component, f"{key}", attribute)

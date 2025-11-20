@@ -2,6 +2,7 @@
 
 [1] Barabási, Albert-László, and Réka Albert. "Emergence of scaling in random networks." Science (1999): 509-512.
 """
+
 # EdgeSimPy components
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.network_link import NetworkLink
@@ -34,9 +35,7 @@ def barabasi_albert(network_nodes: list, link_specifications: list = [], min_lin
 
     # Checking if the number of link specifications is equal to the number of links in the network topology
     if len(link_specifications) > 0 and sum([spec["number_of_objects"] for spec in link_specifications]) != len(topology.edges()):
-        raise Exception(
-            f"You must specify the properties for {len(topology.edges())} links or ignore the 'link_specifications' parameter."
-        )
+        raise Exception(f"You must specify the properties for {len(topology.edges())} links or ignore the 'link_specifications' parameter.")
 
     # Replacing default NetworkX links with NetworkLink objects
     for link in topology.edges(data=True):

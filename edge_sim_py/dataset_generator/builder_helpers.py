@@ -1,4 +1,5 @@
 """Contains a set of helper methods used when creating datasets for EdgeSimPy."""
+
 # EdgeSimPy components
 from edge_sim_py.components.container_registry import ContainerRegistry
 from edge_sim_py.components.container_image import ContainerImage
@@ -28,9 +29,7 @@ def create_container_registries(container_image_specifications: list, container_
             # Creating key with container registry's image metadata
             images = []
             for image in registry["images"]:
-                image = next(
-                    (i for i in container_image_specifications if i["name"] == image["name"] and i["tag"] == image["tag"]), None
-                )
+                image = next((i for i in container_image_specifications if i["name"] == image["name"] and i["tag"] == image["tag"]), None)
                 images.append(image)
             registry["images"] = images
 

@@ -1,4 +1,5 @@
 """Contains a method that creates user mobility randomly."""
+
 # EdgeSimPy components
 from edge_sim_py.components.base_station import BaseStation
 

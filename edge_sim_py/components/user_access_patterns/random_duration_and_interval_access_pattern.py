@@ -1,4 +1,5 @@
 """Contains a method that defines random user access patterns."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 

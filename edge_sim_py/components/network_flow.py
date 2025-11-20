@@ -1,4 +1,5 @@
-""" Contains network-flow-related functionality."""
+"""Contains network-flow-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 

@@ -1,4 +1,5 @@
-""" Contains container-image-related functionality."""
+"""Contains container-image-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 

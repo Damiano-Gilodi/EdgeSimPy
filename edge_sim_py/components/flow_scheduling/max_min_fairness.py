@@ -29,9 +29,7 @@ def max_min_fairness(topology: object, flows: list):
     for flow in flows:
         flow_just_started = len([bw for bw in flow.bandwidth.values() if bw == None]) > 0
         flow_just_ended = flow.data_to_transfer == 0
-        flow_wasting_bandwidth = (
-            False if flow_just_started else any([flow.data_to_transfer < bw for bw in flow.bandwidth.values()])
-        )
+        flow_wasting_bandwidth = False if flow_just_started else any([flow.data_to_transfer < bw for bw in flow.bandwidth.values()])
 
         if flow_just_started or flow_just_ended or flow_wasting_bandwidth:
             for i in range(0, len(flow.path) - 1):

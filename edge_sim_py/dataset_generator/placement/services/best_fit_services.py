@@ -1,4 +1,5 @@
-""" Contains a method that defines the initial placement of services based on the well-known Best-Fit heuristic."""
+"""Contains a method that defines the initial placement of services based on the well-known Best-Fit heuristic."""
+
 # EdgeSimPy components
 from edge_sim_py.components.edge_server import EdgeServer
 from edge_sim_py.components.container_layer import ContainerLayer

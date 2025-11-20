@@ -1,4 +1,5 @@
-""" Contains the EdgeSimPy's default agent activation scheduler."""
+"""Contains the EdgeSimPy's default agent activation scheduler."""
+
 # EdgeSimPy components
 from edge_sim_py.components import *
 
@@ -57,14 +58,7 @@ class DefaultScheduler(MesaBaseScheduler):
         for agent in ContainerRegistry.all():
             agent.step()
 
-        other_agents = (
-            NetworkSwitch.all()
-            + NetworkLink.all()
-            + BaseStation.all()
-            + ContainerLayer.all()
-            + ContainerImage.all()
-            + Application.all()
-        )
+        other_agents = NetworkSwitch.all() + NetworkLink.all() + BaseStation.all() + ContainerLayer.all() + ContainerImage.all() + Application.all()
         for agent in other_agents:
             agent.step()
 

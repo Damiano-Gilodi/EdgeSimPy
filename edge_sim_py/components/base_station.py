@@ -1,4 +1,5 @@
-""" Contains base-station-related functionality."""
+"""Contains base-station-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 
@@ -60,12 +61,8 @@ class BaseStation(ComponentManager, Agent):
             },
             "relationships": {
                 "users": [{"class": type(user).__name__, "id": user.id} for user in self.users],
-                "edge_servers": [
-                    {"class": type(edge_server).__name__, "id": edge_server.id} for edge_server in self.edge_servers
-                ],
-                "network_switch": {"class": type(self.network_switch).__name__, "id": self.network_switch.id}
-                if self.network_switch
-                else None,
+                "edge_servers": [{"class": type(edge_server).__name__, "id": edge_server.id} for edge_server in self.edge_servers],
+                "network_switch": {"class": type(self.network_switch).__name__, "id": self.network_switch.id} if self.network_switch else None,
             },
         }
         return dictionary

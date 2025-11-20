@@ -1,4 +1,4 @@
-""" Contains a server power model definition."""
+"""Contains a server power model definition."""
 
 
 class LinearServerPowerModel:
@@ -20,9 +20,7 @@ class LinearServerPowerModel:
             power_consumption (float): Server's power consumption.
         """
         if device.active:
-            static_power = (
-                device.power_model_parameters["static_power_percentage"] * device.power_model_parameters["max_power_consumption"]
-            )
+            static_power = device.power_model_parameters["static_power_percentage"] * device.power_model_parameters["max_power_consumption"]
             constant = (device.power_model_parameters["max_power_consumption"] - static_power) / 100
 
             demand = device.cpu_demand

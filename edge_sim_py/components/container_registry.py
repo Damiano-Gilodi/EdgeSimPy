@@ -1,4 +1,5 @@
-""" Contains container-registry-related functionality."""
+"""Contains container-registry-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.container_image import ContainerImage
@@ -105,10 +106,7 @@ class ContainerRegistry(ComponentManager, Agent):
 
             # Checking if the host has the container registry image
             server_images_digests = [image.digest for image in self.server.container_images]
-            if (
-                layers_hosted_by_server == len(registry_image.layers_digests)
-                and registry_image.digest not in server_images_digests
-            ):
+            if layers_hosted_by_server == len(registry_image.layers_digests) and registry_image.digest not in server_images_digests:
                 self.server._add_container_image(template_container_image=registry_image)
 
             # Updating registry's availability status if its provisioning process has ended
@@ -187,9 +185,7 @@ class ContainerRegistry(ComponentManager, Agent):
             purge_images (bool, optional): Removes all container images and associated layers from the server. Defaults to False.
         """
         # Checking if the registry has a host server and if is not currently being used to pull any container layer
-        flows_using_the_registry = [
-            flow for flow in NetworkFlow.all() if flow.status == "active" and flow.metadata["container_registry"] == self
-        ]
+        flows_using_the_registry = [flow for flow in NetworkFlow.all() if flow.status == "active" and flow.metadata["container_registry"] == self]
         if self.server and len(flows_using_the_registry) == 0:
             # Removing unused container images and associated layers from the server if the "purge_images" flag is True
             if purge_images:

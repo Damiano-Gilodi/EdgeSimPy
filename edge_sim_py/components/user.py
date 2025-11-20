@@ -1,4 +1,5 @@
-""" Contains user-related functionality."""
+"""Contains user-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.topology import Topology
@@ -84,9 +85,7 @@ class User(ComponentManager, Agent):
                 "delay_slas": copy.deepcopy(self.delay_slas),
                 "communication_paths": copy.deepcopy(self.communication_paths),
                 "making_requests": copy.deepcopy(self.making_requests),
-                "mobility_model_parameters": copy.deepcopy(self.mobility_model_parameters)
-                if self.mobility_model_parameters
-                else {},
+                "mobility_model_parameters": copy.deepcopy(self.mobility_model_parameters) if self.mobility_model_parameters else {},
             },
             "relationships": {
                 "access_patterns": access_patterns,

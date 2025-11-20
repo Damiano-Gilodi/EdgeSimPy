@@ -1,4 +1,4 @@
-""" Contains network-link-related functionality."""
+"""Contains network-link-related functionality."""
 
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager

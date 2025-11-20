@@ -1,4 +1,5 @@
-""" Contains container-layer-related functionality."""
+"""Contains container-layer-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 

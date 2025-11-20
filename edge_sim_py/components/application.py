@@ -1,4 +1,5 @@
-""" Contains application-related functionality."""
+"""Contains application-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 

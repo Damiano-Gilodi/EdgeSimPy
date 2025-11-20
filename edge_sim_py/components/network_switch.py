@@ -1,4 +1,5 @@
-""" Contains network-switch-related functionality."""
+"""Contains network-switch-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 
@@ -70,13 +71,9 @@ class NetworkSwitch(ComponentManager, Agent):
             },
             "relationships": {
                 "power_model": self.power_model.__name__ if self.power_model else None,
-                "edge_servers": [
-                    {"class": type(edge_server).__name__, "id": edge_server.id} for edge_server in self.edge_servers
-                ],
+                "edge_servers": [{"class": type(edge_server).__name__, "id": edge_server.id} for edge_server in self.edge_servers],
                 "links": [{"class": type(link).__name__, "id": link.id} for link in self.links],
-                "base_station": {"class": type(self.base_station).__name__, "id": self.base_station.id}
-                if self.base_station
-                else None,
+                "base_station": {"class": type(self.base_station).__name__, "id": self.base_station.id} if self.base_station else None,
             },
         }
         return dictionary

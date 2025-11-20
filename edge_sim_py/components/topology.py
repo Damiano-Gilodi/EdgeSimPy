@@ -1,4 +1,5 @@
-""" Contains topology-related functionality."""
+"""Contains topology-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow

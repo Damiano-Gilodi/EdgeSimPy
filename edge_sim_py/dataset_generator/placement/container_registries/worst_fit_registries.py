@@ -1,4 +1,5 @@
-""" Contains a method that defines the initial placement of container registries based on the well-known Worst Fit algorithm."""
+"""Contains a method that defines the initial placement of container registries based on the well-known Worst Fit algorithm."""
+
 # EdgeSimPy component builder helpers
 from edge_sim_py.dataset_generator.builder_helpers import provision_container_registry
 
@@ -13,11 +14,7 @@ def worst_fit_registries(container_registry_specifications: list, servers: list)
         )
         for edge_server in servers:
             # Gathering the list of layers from the registry that are not present in the edge server
-            new_layers = [
-                layer
-                for layer in registry["layers"]
-                if not any(layer["digest"] == l.digest for l in edge_server.container_layers)
-            ]
+            new_layers = [layer for layer in registry["layers"] if not any(layer["digest"] == l.digest for l in edge_server.container_layers)]
 
             # Calculating the amount of disk resources required by all container layers not present in the edge server's disk
             cpu_demand = registry["cpu_demand"]

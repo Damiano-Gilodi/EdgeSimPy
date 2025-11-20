@@ -1,4 +1,5 @@
-""" Contains edge-server-related functionality."""
+"""Contains edge-server-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow
@@ -130,12 +131,8 @@ class EdgeServer(ComponentManager, Agent):
             },
             "relationships": {
                 "power_model": self.power_model.__name__ if self.power_model else None,
-                "base_station": {"class": type(self.base_station).__name__, "id": self.base_station.id}
-                if self.base_station
-                else None,
-                "network_switch": {"class": type(self.network_switch).__name__, "id": self.network_switch.id}
-                if self.network_switch
-                else None,
+                "base_station": {"class": type(self.base_station).__name__, "id": self.base_station.id} if self.base_station else None,
+                "network_switch": {"class": type(self.network_switch).__name__, "id": self.network_switch.id} if self.network_switch else None,
                 "services": [{"class": type(service).__name__, "id": service.id} for service in self.services],
                 "container_layers": [{"class": type(layer).__name__, "id": layer.id} for layer in self.container_layers],
                 "container_images": [{"class": type(image).__name__, "id": image.id} for image in self.container_images],
@@ -257,9 +254,7 @@ class EdgeServer(ComponentManager, Agent):
         # Checking if the edge server has all the container layers that compose the container image
         for layer_digest in template_container_image.layers_digests:
             if not any([layer_digest == layer.digest for layer in self.container_layers]):
-                raise Exception(
-                    f"Failed in adding an image to {self} as it does not hosts all the layers necessary ({layer_digest})."
-                )
+                raise Exception(f"Failed in adding an image to {self} as it does not hosts all the layers necessary ({layer_digest}).")
 
         # Creating a ContainerImage object to represent the new image
         image = ContainerImage()

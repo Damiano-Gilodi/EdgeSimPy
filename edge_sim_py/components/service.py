@@ -1,4 +1,5 @@
-""" Contains service-related functionality."""
+"""Contains service-related functionality."""
+
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.container_image import ContainerImage
@@ -148,9 +149,7 @@ class Service(ComponentManager, Agent):
             # Gathering layers present in the target server (layers, download_queue, waiting_queue)
             layers_downloaded = [l for l in migration["target"].container_layers if l.digest in image.layers_digests]
             layers_on_download_queue = [
-                flow.metadata["object"]
-                for flow in migration["target"].download_queue
-                if flow.metadata["object"].digest in image.layers_digests
+                flow.metadata["object"] for flow in migration["target"].download_queue if flow.metadata["object"].digest in image.layers_digests
             ]
 
             # Setting the migration status to "pulling_layers" once any of the service layers start being downloaded

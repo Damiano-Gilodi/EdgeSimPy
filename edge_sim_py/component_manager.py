@@ -1,10 +1,11 @@
-""" Adds helper methods to class objects that ease manipulation.
+"""Adds helper methods to class objects that ease manipulation.
 
 Example:
     'Application.first()' allows you to get the first instance from Application class.
     'User.count()' allows you to get the number of created instances from class User.
     'Service.find_by_id(3)' allows you to find the Service object that has id attribute = 3
 """
+
 # Python libraries
 import os
 import json
@@ -32,9 +33,7 @@ class ComponentManager:
         return f"{self.__class__.__name__}_{self.id}"
 
     @classmethod
-    def export_scenario(
-        cls, ignore_list: list = ["Simulator", "Topology", "NetworkFlow"], save_to_file: bool = False, file_name: str = "dataset"
-    ) -> dict:
+    def export_scenario(cls, ignore_list: list = ["Simulator", "Topology", "NetworkFlow"], save_to_file: bool = False, file_name: str = "dataset") -> dict:
         """Exports metadata about the simulation model to a Python dictionary. If the "save_to_file" attribute is set to True, the
         external dataset file generated is saved inside the "datasets/" directory by default.
 
