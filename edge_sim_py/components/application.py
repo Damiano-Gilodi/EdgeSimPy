@@ -1,12 +1,11 @@
 """Contains application-related functionality."""
 
 # EdgeSimPy components
+from typing import Optional
 from edge_sim_py.component_manager import ComponentManager
 
 # Mesa modules
 from mesa import Agent
-
-from edge_sim_py.components.data_packet import DataPacket
 
 
 class Application(ComponentManager, Agent):
@@ -44,7 +43,7 @@ class Application(ComponentManager, Agent):
         # List of users that access the application
         self.users = []
 
-        self.data_packets: list[DataPacket] = []
+        self.data_packet: Optional["DataPacket"] = None
 
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
@@ -64,7 +63,7 @@ class Application(ComponentManager, Agent):
             "relationships": {
                 "services": [{"class": type(service).__name__, "id": service.id} for service in self.services],
                 "users": [{"class": type(user).__name__, "id": user.id} for user in self.users],
-                "data_packets": [{"class": type(DataPacket).__name__, "id": data.id} for data in self.data_packets],
+                "data_packet": self.data_packet,
             },
         }
         return dictionary

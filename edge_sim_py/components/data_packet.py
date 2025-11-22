@@ -24,7 +24,7 @@ class DataPacket(ComponentManager, Agent):
             obj_id = self.__class__._object_count
         self.id = obj_id
 
-        self.applications: list[Application] = []
+        self.application: Optional["Application"] = None
 
         self.size = size
 
@@ -83,13 +83,28 @@ class DataPacket(ComponentManager, Agent):
                 "hops": copy.deepcopy(self.hops),
             },
             "relationships": {
-                "applications": [{"class": type(app).__name__, "id": app.id} for app in self.applications],
+                "application": self.application,
             },
         }
 
         return dictionary
 
-    def connect_to_app(self, app: Application) -> object:
+    def collect(self) -> dict:
+
+        metrics = {
+            "Instance ID": self.id,
+            "Application": self.application.id if self.application else None,
+            "Size": self.size,
+            "Queue delay total": self.queue_delay_total,
+            "Transmission delay total": self.transmission_delay_total,
+            "Processing delay total": self.processing_delay_total,
+            "Propagation delay total": self.propagation_delay_total,
+            "Hops": copy.deepcopy(self.hops),
+        }
+
+        return metrics
+
+    def connect_to_app(self, app: "Application"):
         """Creates a relationship between the data packet and a given Application object.
 
         Args:
@@ -98,7 +113,5 @@ class DataPacket(ComponentManager, Agent):
         Returns:
             object: Updated Application object.
         """
-        self.applications.append(app)
-        app.data_packets = self
-
-        return self
+        self.application = app
+        app.data_packet = self
