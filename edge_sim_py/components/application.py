@@ -6,6 +6,8 @@ from edge_sim_py.component_manager import ComponentManager
 # Mesa modules
 from mesa import Agent
 
+from edge_sim_py.components.data_packet import DataPacket
+
 
 class Application(ComponentManager, Agent):
     """Class that represents an application."""
@@ -14,7 +16,7 @@ class Application(ComponentManager, Agent):
     _instances = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None, label: str = "") -> object:
+    def __init__(self, obj_id: int = None, label: str = ""):
         """Creates an Application object.
 
         Args:
@@ -42,6 +44,8 @@ class Application(ComponentManager, Agent):
         # List of users that access the application
         self.users = []
 
+        self.data_packets: list[DataPacket] = []
+
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
         self.unique_id = None
@@ -60,6 +64,7 @@ class Application(ComponentManager, Agent):
             "relationships": {
                 "services": [{"class": type(service).__name__, "id": service.id} for service in self.services],
                 "users": [{"class": type(user).__name__, "id": user.id} for user in self.users],
+                "data_packets": [{"class": type(DataPacket).__name__, "id": data.id} for data in self.data_packets],
             },
         }
         return dictionary
