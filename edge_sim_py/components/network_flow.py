@@ -25,7 +25,7 @@ class NetworkFlow(ComponentManager, Agent):
         path: list = [],
         data_to_transfer: int = 0,
         metadata: dict = {},
-    ) -> object:
+    ):
         """Creates a NetworkFlow object.
 
         Args:
@@ -173,6 +173,37 @@ class NetworkFlow(ComponentManager, Agent):
                     service = self.metadata["object"]
                     service._Service__migrations[-1]["status"] = "finished"
 
-    def _generate_next_hop(self, current_step: int):
+    def _generate_next_hop(self, current_step: int) -> "NetworkFlow":
+        """Method that generates the next hop flow for multi-hop flows.
+        Args:
+            current_step (int): Current simulation step.
+        Returns:
+            NetworkFlow: Next hop flow.
+        """
 
-        return
+        app = self.metadata["app"]
+
+        next_hop = self.metadata["hop_index"] + 1
+
+        delay_output, size_output = app.processing_services[str(self.target.id)]
+
+        flow = NetworkFlow(
+            topology=self.topology,
+            source=self.target,
+            target=app.services[next_hop],
+            start=current_step,
+            path=self.metadata["paths"][next_hop],
+            data_to_transfer=size_output,
+            metadata={
+                "type": "data_hop",
+                "object": self.metadata["object"],
+                "paths": self.metadata["paths"],
+                "hop_index": self.metadata["hop_index"] + 1,
+                "user": self.metadata["user"],
+                "app": self.metadata["app"],
+            },
+        )
+
+        self.model.initialize_agent(flow)
+
+        return flow

@@ -45,6 +45,10 @@ class Application(ComponentManager, Agent):
         # List of services that compose the application
         self.services: list[Service] = []
 
+        # Dictionary that maps each service ID to a tuple containing
+        # the processing delay and output data size of that service
+        self.processing_services: dict[str, tuple[int, int]] = {}
+
         # List of users that access the application
         self.users: list[User] = []
 
