@@ -2,6 +2,8 @@
 
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
+from edge_sim_py.components.application import Application
+from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.base_station import BaseStation
 from edge_sim_py.components.network_switch import NetworkSwitch
@@ -131,6 +133,8 @@ class User(ComponentManager, Agent):
             if self.making_requests[str(app.id)][str(current_step)] == True:
                 if len([s for s in app.services if s._available]) == len(app.services):
                     last_access["access_time"] += 1
+                    self._create_first_flow_hop(app=app, current_step=current_step)
+
                 else:
                     last_access["waiting_time"] += 1
 
@@ -296,3 +300,40 @@ class User(ComponentManager, Agent):
 
         self.base_station = base_station
         base_station.users.append(self)
+
+    def _create_first_flow_hop(self, app: Application, current_step: int) -> NetworkFlow:
+        """Creates the first hop of a data packet flow from the user to his application.
+
+        Args:
+            app (object): Application accessed by the user.
+
+        Returns:
+            flow (object): Created network flow object.
+        """
+        if self.model is None:
+            raise AttributeError("User object has no reference to a model")
+
+        dp = app.data_packet
+        services = app.services
+        all_services_path = copy.deepcopy(self.set_communication_path(app=app))
+
+        flow = NetworkFlow(
+            topology=self.model.topology,
+            source=services[0].server,
+            target=services[1].server,
+            start=current_step,
+            path=all_services_path[0],
+            data_to_transfer=dp.size,
+            metadata={
+                "type": "data_hop",
+                "object": dp,
+                "paths": all_services_path,
+                "hop_index": 0,
+                "user": self,
+                "app": app,
+            },
+        )
+
+        self.model.initialize_agent(flow)
+
+        return flow
