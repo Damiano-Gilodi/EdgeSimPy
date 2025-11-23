@@ -1,7 +1,4 @@
-import copy
 from unittest.mock import MagicMock, patch
-from edge_sim_py.components import data_packet
-from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.user import User
 
 

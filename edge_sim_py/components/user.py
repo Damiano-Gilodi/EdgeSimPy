@@ -9,21 +9,21 @@ from edge_sim_py.components.base_station import BaseStation
 from edge_sim_py.components.network_switch import NetworkSwitch
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 # Python libraries
 import copy
-import networkx as nx
+import networkx as nx  # type: ignore
 
 
 class User(ComponentManager, Agent):
     """Class that represents an user."""
 
     # Class attributes that allow this class to use helper methods from the ComponentManager
-    _instances = []
+    _instances: list["User"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None) -> object:
+    def __init__(self, obj_id: int | None = None):
         """Creates an User object.
 
         Args:
@@ -46,7 +46,7 @@ class User(ComponentManager, Agent):
         self.coordinates = None
 
         # List of applications accessed by the user
-        self.applications = []
+        self.applications: list[Application] = []
 
         # Reference to the base station the user is connected to
         self.base_station = None
@@ -130,7 +130,7 @@ class User(ComponentManager, Agent):
             # his application to be provisioned. Access time represents the period in which the user is successfully accessing
             # his application, meaning his application is available. We assume that an application is only available when all its
             # services are available.
-            if self.making_requests[str(app.id)][str(current_step)] == True:
+            if self.making_requests[str(app.id)][str(current_step)]:
                 if len([s for s in app.services if s._available]) == len(app.services):
                     last_access["access_time"] += 1
                     self._create_first_flow_hop(app=app, current_step=current_step)
@@ -170,7 +170,7 @@ class User(ComponentManager, Agent):
                     self.communication_paths[str(application.id)] = []
                     self._compute_delay(app=application)
 
-    def _compute_delay(self, app: object, metric: str = "latency") -> int:
+    def _compute_delay(self, app: Application, metric: str = "latency") -> int:
         """Computes the delay of an application accessed by the user.
 
         Args:
@@ -203,7 +203,7 @@ class User(ComponentManager, Agent):
 
         return delay
 
-    def set_communication_path(self, app: object, communication_path: list = []) -> list:
+    def set_communication_path(self, app: Application, communication_path: list = []) -> list:
         """Updates the set of links used during the communication of user and its application.
 
         Args:
@@ -260,7 +260,7 @@ class User(ComponentManager, Agent):
 
         return self.communication_paths[str(app.id)]
 
-    def _connect_to_application(self, app: object, delay_sla: float) -> object:
+    def _connect_to_application(self, app: Application, delay_sla: float):
         """Connects the user to a given application, establishing all the relationship attributes in both objects.
 
         Args:
@@ -278,7 +278,7 @@ class User(ComponentManager, Agent):
         self.delay_slas[str(app.id)] = delay_sla
         self.delays[str(app.id)] = None
 
-    def _set_initial_position(self, coordinates: list, number_of_replicates: int = 0) -> object:
+    def _set_initial_position(self, coordinates: list, number_of_replicates: int = 0):
         """Defines the initial coordinates for the user, automatically connecting to a base station in that position.
 
         Args:
@@ -305,10 +305,10 @@ class User(ComponentManager, Agent):
         """Creates the first hop of a data packet flow from the user to his application.
 
         Args:
-            app (object): Application accessed by the user.
+            app (Application): Application accessed by the user.
 
         Returns:
-            flow (object): Created network flow object.
+            flow (NetworkFlow): Created network flow object.
         """
         if self.model is None:
             raise AttributeError("User object has no reference to a model")

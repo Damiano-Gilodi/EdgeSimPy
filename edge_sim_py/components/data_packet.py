@@ -1,9 +1,10 @@
 import copy
+from typing import TYPE_CHECKING
 from mesa import Agent  # type: ignore
 from edge_sim_py.component_manager import ComponentManager
-from typing import Optional
 
-from edge_sim_py.components.application import Application
+if TYPE_CHECKING:
+    from edge_sim_py.components.application import Application
 
 
 class DataPacket(ComponentManager, Agent):
@@ -13,7 +14,7 @@ class DataPacket(ComponentManager, Agent):
     _instances: list["DataPacket"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: Optional[int] = None, size: int = 0):
+    def __init__(self, obj_id: int | None = None, size: int = 0):
 
         # Adding the new object to the list of instances of its class
         self.__class__._instances.append(self)
@@ -24,7 +25,7 @@ class DataPacket(ComponentManager, Agent):
             obj_id = self.__class__._object_count
         self.id = obj_id
 
-        self.application: Optional["Application"] = None
+        self.application: Application | None = None
 
         self.size = size
 

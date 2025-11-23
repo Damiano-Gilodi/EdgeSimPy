@@ -1,21 +1,26 @@
 """Contains application-related functionality."""
 
 # EdgeSimPy components
-from typing import Optional
+from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
+
+if TYPE_CHECKING:
+    from edge_sim_py.components.data_packet import DataPacket
+    from edge_sim_py.components.service import Service
+    from edge_sim_py.components.user import User
 
 
 class Application(ComponentManager, Agent):
     """Class that represents an application."""
 
     # Class attributes that allow this class to use helper methods from the ComponentManager
-    _instances = []
+    _instances: list["Application"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None, label: str = ""):
+    def __init__(self, obj_id: int | None = None, label: str = ""):
         """Creates an Application object.
 
         Args:
@@ -38,12 +43,12 @@ class Application(ComponentManager, Agent):
         self.label = label
 
         # List of services that compose the application
-        self.services = []
+        self.services: list[Service] = []
 
         # List of users that access the application
-        self.users = []
+        self.users: list[User] = []
 
-        self.data_packet: Optional["DataPacket"] = None
+        self.data_packet: DataPacket | None = None
 
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
@@ -74,14 +79,14 @@ class Application(ComponentManager, Agent):
         Returns:
             metrics (dict): Object metrics.
         """
-        metrics = {}
+        metrics: dict = {}
         return metrics
 
     def step(self):
         """Method that executes the events involving the object at each time step."""
         ...
 
-    def connect_to_service(self, service: object) -> object:
+    def connect_to_service(self, service: "Service") -> object:
         """Creates a relationship between the application and a given Service object.
 
         Args:

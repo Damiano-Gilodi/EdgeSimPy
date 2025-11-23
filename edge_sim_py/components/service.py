@@ -1,6 +1,7 @@
 """Contains service-related functionality."""
 
 # EdgeSimPy components
+from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.container_image import ContainerImage
 from edge_sim_py.components.container_layer import ContainerLayer
@@ -11,6 +12,9 @@ from mesa import Agent
 
 # Python libraries
 import networkx as nx
+
+if TYPE_CHECKING:
+    from edge_sim_py.components.application import Application
 
 
 class Service(ComponentManager, Agent):
@@ -68,7 +72,7 @@ class Service(ComponentManager, Agent):
         self.server = None
 
         # Application to whom the service belongs
-        self.application = None
+        self.application: Application | None = None
 
         # List of users that access the service
         self.users = []
