@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock, patch
 
+from edge_sim_py.components.data_packet import DataPacket
 from edge_sim_py.components.network_flow import NetworkFlow
 
 
@@ -78,8 +79,8 @@ def test_generate_next_hop_no_more_hops():
     flow = NetworkFlow(
         topology=MagicMock(),
         status="finished",
-        source=user,
-        target=service1,
+        source=service1,
+        target=service2,
         start=0,
         path=[],
         data_to_transfer=0,

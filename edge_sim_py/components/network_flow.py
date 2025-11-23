@@ -173,37 +173,47 @@ class NetworkFlow(ComponentManager, Agent):
                     service = self.metadata["object"]
                     service._Service__migrations[-1]["status"] = "finished"
 
-    def _generate_next_hop(self, current_step: int) -> "NetworkFlow":
+                elif self.metadata["type"] == "data_hop":
+                    # Generating the next hop flow if there are remaining hops
+                    app = self.metadata["app"]
+                    if self.metadata["hop_index"] + 1 < len(app.services) - 1:
+                        self._generate_next_hop(current_step=self.end)
+
+    def _generate_next_hop(self, current_step: int) -> "NetworkFlow | None":
         """Method that generates the next hop flow for multi-hop flows.
         Args:
             current_step (int): Current simulation step.
         Returns:
             NetworkFlow: Next hop flow.
         """
+        if self.metadata["hop_index"] + 1 < len(self.metadata["app"].services) - 1:
+            app = self.metadata["app"]
 
-        app = self.metadata["app"]
+            next_hop = self.metadata["hop_index"] + 1
 
-        next_hop = self.metadata["hop_index"] + 1
+            delay_output, size_output = app.processing_services[str(self.target.id)]
 
-        delay_output, size_output = app.processing_services[str(self.target.id)]
+            flow = NetworkFlow(
+                topology=self.topology,
+                source=self.target,
+                target=app.services[next_hop],
+                start=current_step,
+                path=self.metadata["paths"][next_hop],
+                data_to_transfer=size_output,
+                metadata={
+                    "type": "data_hop",
+                    "object": self.metadata["object"],
+                    "paths": self.metadata["paths"],
+                    "hop_index": self.metadata["hop_index"] + 1,
+                    "user": self.metadata["user"],
+                    "app": self.metadata["app"],
+                },
+            )
 
-        flow = NetworkFlow(
-            topology=self.topology,
-            source=self.target,
-            target=app.services[next_hop],
-            start=current_step,
-            path=self.metadata["paths"][next_hop],
-            data_to_transfer=size_output,
-            metadata={
-                "type": "data_hop",
-                "object": self.metadata["object"],
-                "paths": self.metadata["paths"],
-                "hop_index": self.metadata["hop_index"] + 1,
-                "user": self.metadata["user"],
-                "app": self.metadata["app"],
-            },
-        )
+            self.model.initialize_agent(flow)
 
-        self.model.initialize_agent(flow)
+            return flow
 
-        return flow
+        else:
+
+            return None
