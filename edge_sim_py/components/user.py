@@ -319,8 +319,8 @@ class User(ComponentManager, Agent):
 
         flow = NetworkFlow(
             topology=self.model.topology,
-            source=services[0].server,
-            target=services[1].server,
+            source=self,
+            target=services[1],
             start=current_step,
             path=all_services_path[0],
             data_to_transfer=dp.size,

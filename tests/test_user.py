@@ -11,9 +11,6 @@ def test_user_create_first_flow_hop():
 
     service1 = MagicMock()
     service2 = MagicMock()
-    service1.server = MagicMock()
-    service2.server = MagicMock()
-
     app.services = [service1, service2]
 
     user = User(1)
@@ -29,8 +26,8 @@ def test_user_create_first_flow_hop():
 
             MockFlow.assert_called_once_with(
                 topology=model.topology,
-                source=app.services[0].server,
-                target=app.services[1].server,
+                source=user,
+                target=app.services[1],
                 start=5,
                 path=[1, 2, 3],
                 data_to_transfer=100,

@@ -172,3 +172,7 @@ class NetworkFlow(ComponentManager, Agent):
                 elif self.metadata["type"] == "service_state":
                     service = self.metadata["object"]
                     service._Service__migrations[-1]["status"] = "finished"
+
+    def _generate_next_hop(self, current_step: int):
+
+        return
