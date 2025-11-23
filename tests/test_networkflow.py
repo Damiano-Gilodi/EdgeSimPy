@@ -62,3 +62,42 @@ def test_generate_next_hop():
         )
 
         flow.model.initialize_agent.assert_called_once_with(MockFlow.return_value)
+
+
+def test_generate_next_hop_no_more_hops():
+
+    user = MagicMock()
+    app = MagicMock()
+    service1 = MagicMock()
+    service1.id = 1
+    service2 = MagicMock()
+    service2.id = 2
+    app.services = [service1, service2]
+    app.processing_services = {"1": (1, 10), "2": (2, 30)}
+
+    flow = NetworkFlow(
+        topology=MagicMock(),
+        status="finished",
+        source=user,
+        target=service1,
+        start=0,
+        path=[],
+        data_to_transfer=0,
+        metadata={
+            "type": "data_hop",
+            "object": MagicMock(),
+            "paths": MagicMock(),
+            "hop_index": 1,  # Last hop
+            "user": MagicMock(),
+            "app": app,
+        },
+    )
+    flow.end = 10
+    model = MagicMock()
+    flow.model = model
+
+    with patch("edge_sim_py.components.network_flow.NetworkFlow") as MockFlow:
+
+        flow._generate_next_hop(current_step=flow.end)
+
+        MockFlow.assert_not_called()
