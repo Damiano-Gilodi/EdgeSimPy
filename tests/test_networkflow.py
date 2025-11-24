@@ -124,7 +124,7 @@ def test_update_data_packet():
         source=MagicMock(),
         target=service1,
         start=0,
-        path=MagicMock(),
+        path=[1, 2, 3],
         data_to_transfer=data.size,
         metadata={
             "type": "data_hop",

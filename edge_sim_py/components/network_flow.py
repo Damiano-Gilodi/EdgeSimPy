@@ -181,6 +181,7 @@ class NetworkFlow(ComponentManager, Agent):
                     service._Service__migrations[-1]["status"] = "finished"
 
                 elif self.metadata["type"] == "data_hop":
+                    self._update_data_packet()
                     # Generating the next hop flow if there are remaining hops
                     app = self.metadata["app"]
                     if self.metadata["hop_index"] + 1 < len(app.services) - 1:
@@ -227,4 +228,24 @@ class NetworkFlow(ComponentManager, Agent):
 
     def _update_data_packet(self):
 
-        return
+        data = self.metadata["object"]
+        app = self.metadata["app"]
+        delay_output, size_output = app.processing_services[str(self.target.id)]
+
+        prop_delay = 0
+
+        for i in range(0, len(self.path) - 1):
+            link = self.topology[self.path[i]][self.path[i + 1]]
+            prop_delay += link["delay"]
+
+        data.add_hop(
+            start_service_id=self.source.id,
+            target_service_id=self.target.id,
+            path=self.path,
+            size_start=data.size,
+            size_target_processing=size_output,
+            queue_delay=self.metadata["queue_delay"],
+            transmission_delay=self.end - self.start,
+            target_processing_delay=delay_output,
+            propagation_delay=prop_delay,
+        )
