@@ -140,8 +140,15 @@ class NetworkFlow(ComponentManager, Agent):
         """Method that executes the events involving the object at each time step."""
         if self.status == "active":
             # Updating the flow progress according to the available bandwidth
-            if not any([bw == None for bw in self.bandwidth.values()]):
-                self.data_to_transfer -= min(self.bandwidth.values())
+            if any([bw is None for bw in self.bandwidth.values()]):
+                return
+
+            if min(self.bandwidth.values()) == 0:
+                self.metadata.setdefault("queue_delay", 0)
+                self.metadata["queue_delay"] += 1
+                return
+
+            self.data_to_transfer -= min(self.bandwidth.values())
 
             if self.data_to_transfer <= 0:
                 # Updating the completed flow's properties
@@ -177,9 +184,9 @@ class NetworkFlow(ComponentManager, Agent):
                     # Generating the next hop flow if there are remaining hops
                     app = self.metadata["app"]
                     if self.metadata["hop_index"] + 1 < len(app.services) - 1:
-                        self._generate_next_hop(current_step=self.end)
+                        self._generate_next_hop()
 
-    def _generate_next_hop(self, current_step: int) -> "NetworkFlow | None":
+    def _generate_next_hop(self) -> "NetworkFlow | None":
         """Method that generates the next hop flow for multi-hop flows.
         Args:
             current_step (int): Current simulation step.
@@ -197,7 +204,7 @@ class NetworkFlow(ComponentManager, Agent):
                 topology=self.topology,
                 source=self.target,
                 target=app.services[next_hop],
-                start=current_step,
+                start=self.end,
                 path=self.metadata["paths"][next_hop],
                 data_to_transfer=size_output,
                 metadata={
@@ -217,3 +224,7 @@ class NetworkFlow(ComponentManager, Agent):
         else:
 
             return None
+
+    def _update_data_packet(self):
+
+        return
