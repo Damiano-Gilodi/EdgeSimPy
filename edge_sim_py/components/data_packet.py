@@ -40,21 +40,49 @@ class DataPacket(ComponentManager, Agent):
         # Data packet size
         self.size = size
 
-        # Delays
-        self.queue_delay_total = 0
-        self.transmission_delay_total = 0
-        self.processing_delay_total = 0
-        self.propagation_delay_total = 0
+        # Application
+        self.application: "Application" | None = None
 
-        self.total_delay = 0
+        # Delays
+        self._queue_delay_total = 0
+        self._transmission_delay_total = 0
+        self._processing_delay_total = 0
+        self._propagation_delay_total = 0
+
+        self._total_delay = 0
 
         # Hops
-        self.link_hops: list = []
+        self.__link_hops: list = []
 
     def _to_dict(self) -> dict:
+        """Method that overrides the way the object is formatted to JSON."
 
-        return {}
+        Returns:
+            dict: JSON-friendly representation of the object as a dictionary.
+        """
+        dictionary = {
+            "attributes": {
+                "id": self.id,
+                "size": self.size,
+                "queue_delay_total": self._queue_delay_total,
+                "transmission_delay_total": self._transmission_delay_total,
+                "processing_delay_total": self._processing_delay_total,
+                "propagation_delay_total": self._propagation_delay_total,
+                "total_delay": self._total_delay,
+                "hops": self.__link_hops,
+            },
+            "relationships": {
+                "application": {"class": type(self.application).__name__, "id": self.application.id} if self.application else None,
+            },
+        }
+        return dictionary
 
     def connect_to_app(self, app: "Application"):
+        """Connects the data packet to a given application, establishing all the relationship attributes in both objects.
 
-        return
+        Args:
+            app (Application): Application to connect to.
+        """
+        # Link the data packet to the application
+        self.application = app
+        app.data_packet = self

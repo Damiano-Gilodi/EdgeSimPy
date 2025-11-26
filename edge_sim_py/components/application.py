@@ -1,10 +1,14 @@
 """Contains application-related functionality."""
 
 # EdgeSimPy components
+from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore[import]
+
+if TYPE_CHECKING:
+    from edge_sim_py.components.data_packet import DataPacket
 
 
 class Application(ComponentManager, Agent):
@@ -42,6 +46,9 @@ class Application(ComponentManager, Agent):
         # List of users that access the application
         self.users = []
 
+        # Data packet associated with the application
+        self.data_packet: "DataPacket" | None = None
+
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
         self.unique_id = None
@@ -60,6 +67,7 @@ class Application(ComponentManager, Agent):
             "relationships": {
                 "services": [{"class": type(service).__name__, "id": service.id} for service in self.services],
                 "users": [{"class": type(user).__name__, "id": user.id} for user in self.users],
+                "data_packet": {"class": type(self.data_packet).__name__, "id": self.data_packet.id} if self.data_packet else None,
             },
         }
         return dictionary
