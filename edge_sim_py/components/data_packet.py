@@ -1,6 +1,8 @@
 """Contains data packet-related functionality."""
 
 # EdgeSimPy components
+import copy
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 
@@ -9,6 +11,25 @@ from mesa import Agent  # type: ignore[import]
 
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
+
+
+@dataclass(frozen=True)
+class LinkHop:
+    """Class that represents a link hop in the data packet's path."""
+
+    hop_index: int
+    link_index: int
+    source: str
+    target: str
+    start_time: float
+    end_time: float
+    queue_delay: float
+    transmission_delay: float
+    processing_delay: float
+    propagation_delay: float
+    bandwidth: float
+    data_input: int
+    data_output: int
 
 
 class DataPacket(ComponentManager, Agent):
@@ -86,3 +107,9 @@ class DataPacket(ComponentManager, Agent):
         # Link the data packet to the application
         self.application = app
         app.data_packet = self
+
+    def add_link_hop(self, link_hop: LinkHop):
+        return
+
+    def getHops(self) -> list:
+        return copy.deepcopy(self.__link_hops)
