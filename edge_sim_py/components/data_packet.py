@@ -109,7 +109,8 @@ class DataPacket(ComponentManager, Agent):
         app.data_packet = self
 
     def add_link_hop(self, link_hop: LinkHop):
-        return
+
+        self.__link_hops.append(link_hop)
 
     def getHops(self) -> list:
         return copy.deepcopy(self.__link_hops)
