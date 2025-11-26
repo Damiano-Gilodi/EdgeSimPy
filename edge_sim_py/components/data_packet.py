@@ -2,7 +2,7 @@
 
 # EdgeSimPy components
 import copy
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 
@@ -39,7 +39,7 @@ class DataPacket(ComponentManager, Agent):
     _instances: list["DataPacket"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int | None = None, size: int = 0):
+    def __init__(self, application: "Application", size: int = 1, obj_id: int | None = None):
         """Creates a DataPacket object.
 
         Args:
@@ -62,7 +62,7 @@ class DataPacket(ComponentManager, Agent):
         self.size = size
 
         # Application
-        self.application: "Application" | None = None
+        self.application: "Application" = application
 
         # Delays
         self._queue_delay_total = 0
@@ -71,6 +71,9 @@ class DataPacket(ComponentManager, Agent):
         self._propagation_delay_total = 0
 
         self._total_delay = 0
+
+        # Total path (list of hop nodes between services)
+        self.total_path: list[list[int]] = []
 
         # Hops
         self.__link_hops: list = []
@@ -90,7 +93,8 @@ class DataPacket(ComponentManager, Agent):
                 "processing_delay_total": self._processing_delay_total,
                 "propagation_delay_total": self._propagation_delay_total,
                 "total_delay": self._total_delay,
-                "hops": self.__link_hops,
+                "total_path": self.total_path,
+                "hops": [asdict(hop) for hop in self.__link_hops],
             },
             "relationships": {
                 "application": {"class": type(self.application).__name__, "id": self.application.id} if self.application else None,
@@ -98,19 +102,8 @@ class DataPacket(ComponentManager, Agent):
         }
         return dictionary
 
-    def connect_to_app(self, app: "Application"):
-        """Connects the data packet to a given application, establishing all the relationship attributes in both objects.
-
-        Args:
-            app (Application): Application to connect to.
-        """
-        # Link the data packet to the application
-        self.application = app
-        app.data_packet = self
-
     def add_link_hop(self, link_hop: LinkHop):
-
         self.__link_hops.append(link_hop)
 
-    def getHops(self) -> list:
+    def getHops(self) -> list[LinkHop]:
         return copy.deepcopy(self.__link_hops)

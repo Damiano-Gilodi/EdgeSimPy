@@ -10,8 +10,7 @@ def test_to_dict():
     app = MagicMock(spec=Application)
     app.id = 0
 
-    dp = DataPacket(obj_id=1, size=10)
-    dp.connect_to_app(app)
+    dp = DataPacket(application=app, obj_id=1, size=10)
 
     assert dp._to_dict() == {
         "attributes": {
@@ -22,6 +21,7 @@ def test_to_dict():
             "processing_delay_total": 0,
             "propagation_delay_total": 0,
             "total_delay": 0,
+            "total_path": [],
             "hops": [],
         },
         "relationships": {
@@ -32,7 +32,8 @@ def test_to_dict():
 
 def test_add_hop():
 
-    dp = DataPacket(obj_id=1, size=10)
+    app = MagicMock(spec=Application)
+    dp = DataPacket(application=app, obj_id=1, size=10)
 
     sw1 = MagicMock(spec=NetworkSwitch)
     sw1.id = 0
