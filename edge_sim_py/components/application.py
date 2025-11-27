@@ -80,7 +80,13 @@ class Application(ComponentManager, Agent):
         Returns:
             metrics (dict): Object metrics.
         """
-        metrics = {}
+        metrics = {
+            "Id": self.id,
+            "Label": self.label,
+            "Services": copy.deepcopy(self.services),
+            "Users": copy.deepcopy(self.users),
+            "Data packets": copy.deepcopy(self._user_data_packets),
+        }
         return metrics
 
     def step(self):
