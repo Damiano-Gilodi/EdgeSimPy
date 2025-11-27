@@ -9,6 +9,7 @@ from mesa import Agent  # type: ignore[import]
 
 if TYPE_CHECKING:
     from edge_sim_py.components.data_packet import DataPacket
+    from edge_sim_py.components.user import User
 
 
 class Application(ComponentManager, Agent):
@@ -98,3 +99,6 @@ class Application(ComponentManager, Agent):
         service.application = self
 
         return self
+
+    def register_data_packet(self, user: "User", size: int = 1) -> "DataPacket":
+        return DataPacket(application=self, size=size)

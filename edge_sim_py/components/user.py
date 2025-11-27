@@ -2,6 +2,7 @@
 
 # EdgeSimPy components
 from edge_sim_py.component_manager import ComponentManager
+from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.base_station import BaseStation
 from edge_sim_py.components.network_switch import NetworkSwitch
@@ -12,6 +13,7 @@ from mesa import Agent
 # Python libraries
 import copy
 import networkx as nx
+import random
 
 
 class User(ComponentManager, Agent):
@@ -296,3 +298,18 @@ class User(ComponentManager, Agent):
 
         self.base_station = base_station
         base_station.users.append(self)
+
+    def _generate_request_size(self, min_size: int = 1, max_size: int = 100) -> int:
+        """Generates the size of a data packet requested by the user.
+
+        Args:
+            min_size (int, optional): Minimum size of the data packet in bytes. Defaults to 1.
+            max_size (int, optional): Maximum size of the data packet in bytes. Defaults to 100.
+
+        Returns:
+            int: Size of the data packet requested by the user in bytes.
+        """
+        return random.randint(min_size, max_size)
+
+    def _start_flow(self, app: object):
+        return
