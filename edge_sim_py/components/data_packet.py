@@ -83,7 +83,7 @@ class DataPacket(ComponentManager, Agent):
         self.total_path: list[list[int]] = []
 
         # Hops
-        self.__link_hops: list = []
+        self._link_hops: list = []
 
     def _to_dict(self) -> dict:
         """Method that overrides the way the object is formatted to JSON."
@@ -95,13 +95,6 @@ class DataPacket(ComponentManager, Agent):
             "attributes": {
                 "id": self.id,
                 "size": self.size,
-                "queue_delay_total": self._queue_delay_total,
-                "transmission_delay_total": self._transmission_delay_total,
-                "processing_delay_total": self._processing_delay_total,
-                "propagation_delay_total": self._propagation_delay_total,
-                "total_delay": self._total_delay,
-                "total_path": self.total_path,
-                "hops": [asdict(hop) for hop in self.__link_hops],
             },
             "relationships": {
                 "application": {"class": type(self.application).__name__, "id": self.application.id} if self.application else None,
@@ -127,11 +120,12 @@ class DataPacket(ComponentManager, Agent):
             "Propagation delay total": self._propagation_delay_total,
             "Total delay": self._total_delay,
             "Total path": self.total_path,
+            "Hops": [asdict(hop) for hop in self._link_hops],
         }
         return metrics
 
     def add_link_hop(self, link_hop: LinkHop):
-        self.__link_hops.append(link_hop)
+        self._link_hops.append(link_hop)
 
     def getHops(self) -> list[LinkHop]:
-        return copy.deepcopy(self.__link_hops)
+        return copy.deepcopy(self._link_hops)

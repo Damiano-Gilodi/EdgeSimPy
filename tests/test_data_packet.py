@@ -21,13 +21,6 @@ def test_to_dict():
         "attributes": {
             "id": 1,
             "size": 10,
-            "queue_delay_total": 0,
-            "transmission_delay_total": 0,
-            "processing_delay_total": 0,
-            "propagation_delay_total": 0,
-            "total_delay": 0,
-            "total_path": [],
-            "hops": [],
         },
         "relationships": {
             "application": {"class": type(app).__name__, "id": 0},
@@ -101,4 +94,5 @@ def test_collect():
         "Propagation delay total": 0,
         "Total delay": 0,
         "Total path": [],
+        "Hops": [],
     }

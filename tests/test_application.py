@@ -11,4 +11,4 @@ def test_register_data_packet():
     u.id = 1
     dp = app.register_data_packet(user=u, size=20)
 
-    assert app.user_data_packets == {"1": [dp]}
+    assert app._user_data_packets == {"1": [dp]}
