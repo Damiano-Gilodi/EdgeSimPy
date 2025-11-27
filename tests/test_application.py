@@ -9,6 +9,7 @@ def test_register_data_packet():
     app = Application()
     u = MagicMock(spec=User)
     u.id = 1
+    u.communication_paths = {"1": []}
     dp = app.register_data_packet(user=u, size=20)
 
     assert app._user_data_packets == {"1": [dp]}
@@ -30,3 +31,14 @@ def test_collect():
         "Users": app.users,
         "Data packets": app._user_data_packets,
     }
+
+
+def test_verify_set_path_register_data_packet():
+
+    app = Application(obj_id=1)
+    u = MagicMock(spec=User)
+    u.id = 1
+    u.communication_paths = {"1": [[1, 2, 3], [2, 4]]}
+    dp = app.register_data_packet(user=u, size=20)
+
+    assert dp.total_path == [[1, 2, 3], [2, 4]]
