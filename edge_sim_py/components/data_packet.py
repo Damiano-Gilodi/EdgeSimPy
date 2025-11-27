@@ -49,6 +49,9 @@ class DataPacket(ComponentManager, Agent):
         Returns:
             object: Created DataPacket object.
         """
+        if size <= 0:
+            raise ValueError("DataPacket size must be a positive integer.")
+
         # Adding the new object to the list of instances of its class
         self.__class__._instances.append(self)
 
