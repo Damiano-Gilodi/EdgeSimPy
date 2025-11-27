@@ -106,7 +106,23 @@ class DataPacket(ComponentManager, Agent):
         return dictionary
 
     def collect(self) -> dict:
-        return {}
+        """Method that collects a set of metrics for the object.
+
+        Returns:
+            metrics (dict): Object metrics.
+        """
+        metrics = {
+            "Id": self.id,
+            "Application Id": self.application.id,
+            "Size": self.size,
+            "Queue delay total": self._queue_delay_total,
+            "Transmission delay total": self._transmission_delay_total,
+            "Processing delay total": self._processing_delay_total,
+            "Propagation delay total": self._propagation_delay_total,
+            "Total delay": self._total_delay,
+            "Total path": self.total_path,
+        }
+        return metrics
 
     def add_link_hop(self, link_hop: LinkHop):
         self.__link_hops.append(link_hop)
