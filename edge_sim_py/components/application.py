@@ -118,6 +118,9 @@ class Application(ComponentManager, Agent):
         Returns:
             object: Created DataPacket object.
         """
+        if user not in self.users or self not in user.applications:
+            raise ValueError("Connection between application users is not allowed.")
+
         dp = DataPacket(user=user, application=self, size=size)
 
         dp.total_path = user.communication_paths[str(self.id)]
