@@ -73,3 +73,23 @@ def test_zero_negative_size():
 
     with pytest.raises(ValueError, match="DataPacket size must be a positive integer."):
         DataPacket(application=app, size=-1)
+
+
+def test_collect():
+
+    app = MagicMock(spec=Application)
+    app.id = 0
+
+    dp = DataPacket(application=app, obj_id=1, size=10)
+
+    assert dp.collect() == {
+        "Id": 1,
+        "Application Id": 0,
+        "Size": 10,
+        "Queue delay total": 0,
+        "Transmission delay total": 0,
+        "Processing delay total": 0,
+        "Propagation delay total": 0,
+        "Total delay": 0,
+        "Total path": [],
+    }

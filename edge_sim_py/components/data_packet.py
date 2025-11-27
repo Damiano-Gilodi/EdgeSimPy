@@ -105,6 +105,9 @@ class DataPacket(ComponentManager, Agent):
         }
         return dictionary
 
+    def collect(self) -> dict:
+        return {}
+
     def add_link_hop(self, link_hop: LinkHop):
         self.__link_hops.append(link_hop)
 
