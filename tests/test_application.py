@@ -1,4 +1,6 @@
 from unittest.mock import MagicMock
+
+import pytest
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket
 from edge_sim_py.components.user import User
@@ -9,7 +11,11 @@ def test_register_data_packet():
     app = Application()
     u = MagicMock(spec=User)
     u.id = 1
+
+    app.users = [u]
+    u.applications = [app]
     u.communication_paths = {"1": []}
+
     dp = app.register_data_packet(user=u, size=20)
 
     assert app._user_data_packets == {"1": [dp]}
@@ -38,7 +44,22 @@ def test_verify_set_path_register_data_packet():
     app = Application(obj_id=1)
     u = MagicMock(spec=User)
     u.id = 1
+
+    app.users = [u]
+    u.applications = [app]
     u.communication_paths = {"1": [[1, 2, 3], [2, 4]]}
+
     dp = app.register_data_packet(user=u, size=20)
 
     assert dp.total_path == [[1, 2, 3], [2, 4]]
+
+
+def test_connection_between_application_users():
+
+    app = Application(obj_id=1)
+    u = MagicMock(spec=User)
+    u.id = 1
+    u.communication_paths = {"1": []}
+
+    with pytest.raises(ValueError, match="Connection between application users is not allowed."):
+        app.register_data_packet(user=u, size=20)
