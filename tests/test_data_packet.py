@@ -1,5 +1,7 @@
 from unittest.mock import MagicMock
 
+import pytest
+
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket, LinkHop
 from edge_sim_py.components.network_switch import NetworkSwitch
@@ -60,3 +62,14 @@ def test_add_hop():
     dp.add_link_hop(link_hop)
 
     assert dp.getHops() == [link_hop, link_hop]
+
+
+def test_zero_negative_size():
+
+    app = MagicMock(spec=Application)
+
+    with pytest.raises(ValueError, match="DataPacket size must be a positive integer."):
+        DataPacket(application=app, size=0)
+
+    with pytest.raises(ValueError, match="DataPacket size must be a positive integer."):
+        DataPacket(application=app, size=-1)
