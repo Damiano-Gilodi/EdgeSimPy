@@ -63,3 +63,17 @@ def test_connection_between_application_users():
 
     with pytest.raises(ValueError, match="Connection between application users is not allowed."):
         app.register_data_packet(user=u, size=20)
+
+
+def test_communication_path_not_specified():
+
+    app = Application(obj_id=1)
+    u = MagicMock(spec=User)
+    u.id = 1
+
+    app.users = [u]
+    u.applications = [app]
+    u.communication_paths = {}
+
+    with pytest.raises(ValueError, match="Communication path is not specified"):
+        app.register_data_packet(user=u, size=20)
