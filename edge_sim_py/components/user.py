@@ -1,6 +1,7 @@
 """Contains user-related functionality."""
 
 # EdgeSimPy components
+from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.topology import Topology
@@ -14,6 +15,9 @@ from mesa import Agent
 import copy
 import networkx as nx
 import random
+
+if TYPE_CHECKING:
+    from edge_sim_py.components.application import Application
 
 
 class User(ComponentManager, Agent):
@@ -311,5 +315,31 @@ class User(ComponentManager, Agent):
         """
         return random.randint(min_size, max_size)
 
-    def _start_flow(self, app: object):
-        return
+    def _start_flow(self, app: "Application", current_step: int):
+        """Starts a network flow to transfer a data packet from the user to its application.
+
+        Args:
+            app (Application): Application accessed by the user.
+        """
+        # Generating data packet requested by the user
+        dp_size = self._generate_request_size()
+        if str(app.id) not in self.communication_paths:
+            self.set_communication_path(app=app)
+        dp = app.register_data_packet(user=self, size=dp_size)
+
+        index_hop = 0
+        index_link = 0
+        # Starting the network flow to transfer the data packet
+        NetworkFlow(
+            source=dp.total_path[index_hop][index_link],
+            target=dp.total_path[index_hop][index_link + 1],
+            path=dp.total_path[index_hop][index_link : index_link + 2],
+            start=current_step,
+            data_to_transfer=dp.size,
+            metadata={
+                "type": "data_packet",
+                "object": dp,
+                "index_hop": index_hop,
+                "index_link": index_link,
+            },
+        )
