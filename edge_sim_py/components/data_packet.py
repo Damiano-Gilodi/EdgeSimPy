@@ -73,7 +73,7 @@ class DataPacket(ComponentManager, Agent):
         self._processing_delay_total = 0
         self._propagation_delay_total = 0
 
-        self.total_delay = 0
+        self._total_delay = 0
 
         # Total path (list of hop nodes between services)
         self.total_path: list[list[int]] = []

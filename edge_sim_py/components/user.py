@@ -24,10 +24,10 @@ class User(ComponentManager, Agent):
     """Class that represents an user."""
 
     # Class attributes that allow this class to use helper methods from the ComponentManager
-    _instances = []
+    _instances: list["User"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None) -> object:
+    def __init__(self, obj_id: int | None = None):
         """Creates an User object.
 
         Args:
@@ -50,7 +50,7 @@ class User(ComponentManager, Agent):
         self.coordinates = None
 
         # List of applications accessed by the user
-        self.applications = []
+        self.applications: list["Application"] = []
 
         # Reference to the base station the user is connected to
         self.base_station = None
@@ -262,7 +262,7 @@ class User(ComponentManager, Agent):
 
         return self.communication_paths[str(app.id)]
 
-    def _connect_to_application(self, app: object, delay_sla: float) -> object:
+    def _connect_to_application(self, app: object, delay_sla: float):
         """Connects the user to a given application, establishing all the relationship attributes in both objects.
 
         Args:
@@ -280,7 +280,7 @@ class User(ComponentManager, Agent):
         self.delay_slas[str(app.id)] = delay_sla
         self.delays[str(app.id)] = None
 
-    def _set_initial_position(self, coordinates: list, number_of_replicates: int = 0) -> object:
+    def _set_initial_position(self, coordinates: list, number_of_replicates: int = 0):
         """Defines the initial coordinates for the user, automatically connecting to a base station in that position.
 
         Args:
