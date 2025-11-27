@@ -121,6 +121,9 @@ class Application(ComponentManager, Agent):
         if user not in self.users or self not in user.applications:
             raise ValueError("Connection between application users is not allowed.")
 
+        if str(self.id) not in user.communication_paths:
+            raise ValueError("Communication path is not specified")
+
         dp = DataPacket(user=user, application=self, size=size)
 
         dp.total_path = user.communication_paths[str(self.id)]
