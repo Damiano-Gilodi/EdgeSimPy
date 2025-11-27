@@ -5,14 +5,17 @@ import pytest
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket, LinkHop
 from edge_sim_py.components.network_switch import NetworkSwitch
+from edge_sim_py.components.user import User
 
 
 def test_to_dict():
 
     app = MagicMock(spec=Application)
     app.id = 0
+    user = MagicMock(spec=User)
+    user.id = 0
 
-    dp = DataPacket(application=app, obj_id=1, size=10)
+    dp = DataPacket(user=user, application=app, obj_id=1, size=10)
 
     assert dp._to_dict() == {
         "attributes": {
@@ -28,6 +31,7 @@ def test_to_dict():
         },
         "relationships": {
             "application": {"class": type(app).__name__, "id": 0},
+            "user": {"class": type(user).__name__, "id": 0},
         },
     }
 
@@ -35,7 +39,8 @@ def test_to_dict():
 def test_add_hop():
 
     app = MagicMock(spec=Application)
-    dp = DataPacket(application=app, obj_id=1, size=10)
+    user = MagicMock(spec=User)
+    dp = DataPacket(user=user, application=app, obj_id=1, size=10)
 
     sw1 = MagicMock(spec=NetworkSwitch)
     sw1.id = 0
@@ -67,24 +72,28 @@ def test_add_hop():
 def test_zero_negative_size():
 
     app = MagicMock(spec=Application)
+    user = MagicMock(spec=User)
 
     with pytest.raises(ValueError, match="DataPacket size must be a positive integer."):
-        DataPacket(application=app, size=0)
+        DataPacket(user=user, application=app, size=0)
 
     with pytest.raises(ValueError, match="DataPacket size must be a positive integer."):
-        DataPacket(application=app, size=-1)
+        DataPacket(user=user, application=app, size=-1)
 
 
 def test_collect():
 
     app = MagicMock(spec=Application)
     app.id = 0
+    user = MagicMock(spec=User)
+    user.id = 0
 
-    dp = DataPacket(application=app, obj_id=1, size=10)
+    dp = DataPacket(user=user, application=app, obj_id=1, size=10)
 
     assert dp.collect() == {
         "Id": 1,
         "Application Id": 0,
+        "User Id": 0,
         "Size": 10,
         "Queue delay total": 0,
         "Transmission delay total": 0,

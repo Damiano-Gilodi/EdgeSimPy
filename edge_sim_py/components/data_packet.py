@@ -11,6 +11,7 @@ from mesa import Agent  # type: ignore[import]
 
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
+    from edge_sim_py.components.user import User
 
 
 @dataclass(frozen=True)
@@ -39,7 +40,7 @@ class DataPacket(ComponentManager, Agent):
     _instances: list["DataPacket"] = []
     _object_count = 0
 
-    def __init__(self, application: "Application", size: int = 1, obj_id: int | None = None):
+    def __init__(self, user: "User", application: "Application", size: int = 1, obj_id: int | None = None):
         """Creates a DataPacket object.
 
         Args:
@@ -66,6 +67,9 @@ class DataPacket(ComponentManager, Agent):
 
         # Application
         self.application: "Application" = application
+
+        # User
+        self.user: "User" = user
 
         # Delays
         self._queue_delay_total = 0
@@ -101,6 +105,7 @@ class DataPacket(ComponentManager, Agent):
             },
             "relationships": {
                 "application": {"class": type(self.application).__name__, "id": self.application.id} if self.application else None,
+                "user": {"class": type(self.user).__name__, "id": self.user.id} if self.user else None,
             },
         }
         return dictionary
@@ -114,6 +119,7 @@ class DataPacket(ComponentManager, Agent):
         metrics = {
             "Id": self.id,
             "Application Id": self.application.id,
+            "User Id": self.user.id,
             "Size": self.size,
             "Queue delay total": self._queue_delay_total,
             "Transmission delay total": self._transmission_delay_total,
