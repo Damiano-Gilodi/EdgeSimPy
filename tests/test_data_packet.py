@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -96,3 +96,37 @@ def test_collect():
         "Total path": [],
         "Hops": [],
     }
+
+
+def test_launch_next_flow():
+
+    app = MagicMock(spec=Application)
+    model = MagicMock()
+    app.model = model
+
+    dp = DataPacket(user=MagicMock(), application=app)
+    dp.total_path = [[1, 2, 3], [4, 5, 6]]
+    dp.size = 50
+    dp.current_hop = 0
+    dp.current_link = 1
+
+    with patch("edge_sim_py.components.data_packet.NetworkFlow") as mock_flow:
+
+        dp.launch_next_flow(start_step=4)
+
+        mock_flow.assert_called_once_with(
+            topology=dp.application.model.topology,
+            source=2,
+            target=3,
+            path=[2, 3],
+            start=4,
+            data_to_transfer=50,
+            metadata={
+                "type": "data_packet",
+                "object": dp,
+                "index_hop": 0,
+                "index_link": 1,
+            },
+        )
+
+        dp.application.model.initialize_agent.assert_called_once_with(mock_flow.return_value)

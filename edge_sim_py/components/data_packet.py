@@ -5,6 +5,7 @@ import copy
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
+from edge_sim_py.components.network_flow import NetworkFlow
 
 # Mesa modules
 from mesa import Agent  # type: ignore[import]
@@ -129,3 +130,6 @@ class DataPacket(ComponentManager, Agent):
 
     def getHops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
+
+    def launch_next_flow(self, start_step):
+        return
