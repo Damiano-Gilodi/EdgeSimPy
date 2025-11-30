@@ -89,6 +89,10 @@ class DataPacket(ComponentManager, Agent):
         self.current_hop = 0
         self.current_link = 0
 
+        # Processing
+        self.is_processing = False
+        self.processing_remaining_time = 0
+
         # Hops
         self._link_hops: list = []
 

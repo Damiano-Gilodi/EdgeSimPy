@@ -32,6 +32,8 @@ class Service(ComponentManager, Agent):
         cpu_demand: int = 0,
         memory_demand: int = 0,
         state: int = 0,
+        processing_time: int = 0,
+        processing_output: int = 0,
     ) -> object:
         """Creates a Service object.
 
@@ -83,6 +85,11 @@ class Service(ComponentManager, Agent):
 
         # List that stores metadata about each migration experienced by the service throughout the simulation
         self.__migrations = []
+
+        # Processing
+        self.processing_time = processing_time
+        self.processing_output = processing_output
+        self.processing_queue = []
 
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
