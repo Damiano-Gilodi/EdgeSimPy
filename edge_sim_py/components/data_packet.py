@@ -84,6 +84,10 @@ class DataPacket(ComponentManager, Agent):
         self.total_path: list[list[int]] = []
 
         # Hops
+        self.current_hop = 0
+        self.current_link = 0
+
+        # Hops
         self._link_hops: list = []
 
     def _to_dict(self) -> dict:
@@ -132,4 +136,22 @@ class DataPacket(ComponentManager, Agent):
         return copy.deepcopy(self._link_hops)
 
     def launch_next_flow(self, start_step):
-        return
+        """Method that lauches the next flow.
+
+        Args:
+            start_step (int): Time step in which the flow started.
+        """
+        hop = self.current_hop
+        link = self.current_link
+
+        flow = NetworkFlow(
+            topology=self.application.model.topology,
+            source=self.total_path[hop][link],
+            target=self.total_path[hop][link + 1],
+            path=self.total_path[hop][link : link + 2],
+            start=start_step,
+            data_to_transfer=self.size,
+            metadata={"type": "data_packet", "object": self, "index_hop": hop, "index_link": link},
+        )
+
+        self.application.model.initialize_agent(flow)
