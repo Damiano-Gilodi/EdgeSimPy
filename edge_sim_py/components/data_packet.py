@@ -65,7 +65,7 @@ class DataPacket(ComponentManager, Agent):
             obj_id = self.__class__._object_count
         self.id = obj_id
 
-        # Data packet size
+        # Data packet size change in services processing
         self.size = size
 
         # Application

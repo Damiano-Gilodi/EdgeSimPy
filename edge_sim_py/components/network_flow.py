@@ -25,7 +25,7 @@ class NetworkFlow(ComponentManager, Agent):
         path: list = [],
         data_to_transfer: int = 0,
         metadata: dict = {},
-    ) -> object:
+    ):
         """Creates a NetworkFlow object.
 
         Args:
@@ -172,3 +172,10 @@ class NetworkFlow(ComponentManager, Agent):
                 elif self.metadata["type"] == "service_state":
                     service = self.metadata["object"]
                     service._Service__migrations[-1]["status"] = "finished"
+
+                # When data packet flows finish: start the next flow
+                elif self.metadata["type"] == "data_packet":
+                    data_packet = self.metadata["object"]
+                    data_packet.on_flow_finished(self)
+
+                self.model.schedule.remove(self)
