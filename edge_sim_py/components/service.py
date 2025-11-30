@@ -150,6 +150,14 @@ class Service(ComponentManager, Agent):
         return metrics
 
     def step(self):
+
+        for data_packet in self.processing_queue:
+            data_packet.processing_remaining_time -= 1
+            if data_packet.processing_remaining_time <= 0:
+                data_packet.is_processing = False
+                data_packet.launch_next_flow(start_step=self.model.schedule.steps + 1)
+                self.processing_queue.remove(data_packet)
+
         """Method that executes the events involving the object at each time step."""
         if len(self._Service__migrations) > 0 and self._Service__migrations[-1]["end"] == None:
             migration = self._Service__migrations[-1]
