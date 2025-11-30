@@ -1,23 +1,27 @@
 """Contains network-switch-related functionality."""
 
 # EdgeSimPy components
+from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 # Python libraries
 import copy
+
+if TYPE_CHECKING:
+    from edge_sim_py.components.edge_server import EdgeServer
 
 
 class NetworkSwitch(ComponentManager, Agent):
     """Class that represents a network switch."""
 
     # Class attributes that allow this class to use helper methods from ComponentManager
-    _instances = []
+    _instances: list["NetworkSwitch"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None) -> object:
+    def __init__(self, obj_id: int | None = None):
         """Creates a NetworkSwitch object.
 
         Args:
@@ -42,7 +46,7 @@ class NetworkSwitch(ComponentManager, Agent):
         self.base_station = None
 
         # List of edge servers connected to the switch
-        self.edge_servers = []
+        self.edge_servers: list["EdgeServer"] = []
 
         # List of links connected to the switch ports
         self.links = []

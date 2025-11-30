@@ -3,17 +3,16 @@
 # EdgeSimPy components
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
-from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.base_station import BaseStation
 from edge_sim_py.components.network_switch import NetworkSwitch
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 # Python libraries
 import copy
-import networkx as nx
+import networkx as nx  # type: ignore
 import random
 
 if TYPE_CHECKING:
@@ -134,7 +133,7 @@ class User(ComponentManager, Agent):
             # his application to be provisioned. Access time represents the period in which the user is successfully accessing
             # his application, meaning his application is available. We assume that an application is only available when all its
             # services are available.
-            if self.making_requests[str(app.id)][str(current_step)] == True:
+            if self.making_requests[str(app.id)][str(current_step)]:
                 if len([s for s in app.services if s._available]) == len(app.services):
                     last_access["access_time"] += 1
                 else:
@@ -205,7 +204,7 @@ class User(ComponentManager, Agent):
 
         return delay
 
-    def set_communication_path(self, app: object, communication_path: list = []) -> list:
+    def set_communication_path(self, app: "Application", communication_path: list = []) -> list:
         """Updates the set of links used during the communication of user and its application.
 
         Args:

@@ -8,25 +8,27 @@ from edge_sim_py.components.container_layer import ContainerLayer
 from edge_sim_py.components.network_flow import NetworkFlow
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 # Python libraries
-import networkx as nx
+import networkx as nx  # type: ignore
 
 if TYPE_CHECKING:
     from edge_sim_py.components.data_packet import DataPacket
+    from edge_sim_py.components.user import User
+    from edge_sim_py.components.edge_server import EdgeServer
 
 
 class Service(ComponentManager, Agent):
     """Class that represents a service."""
 
     # Class attributes that allow this class to use helper methods from the ComponentManager
-    _instances = []
+    _instances: list["Service"] = []
     _object_count = 0
 
     def __init__(
         self,
-        obj_id: int = None,
+        obj_id: int | None = None,
         image_digest: str = "",
         label: str = "",
         cpu_demand: int = 0,
@@ -34,7 +36,7 @@ class Service(ComponentManager, Agent):
         state: int = 0,
         processing_time: int = 0,
         processing_output: int = 0,
-    ) -> object:
+    ):
         """Creates a Service object.
 
         Args:
@@ -71,25 +73,25 @@ class Service(ComponentManager, Agent):
         self.state = state
 
         # Server that hosts the service
-        self.server = None
+        self.server: "EdgeServer" | None = None
 
         # Application to whom the service belongs
         self.application = None
 
         # List of users that access the service
-        self.users = []
+        self.users: list["User"] = []
 
         # Service availability and provisioning status
         self._available = False  # Service is not available, for example, when its state is being transferred
         self.being_provisioned = False
 
         # List that stores metadata about each migration experienced by the service throughout the simulation
-        self.__migrations = []
+        self.__migrations: list = []
 
         # Processing
         self.processing_time = processing_time
         self.processing_output = processing_output
-        self.processing_queue = []
+        self.processing_queue: list["DataPacket"] = []
 
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
@@ -150,15 +152,9 @@ class Service(ComponentManager, Agent):
         return metrics
 
     def step(self):
-
-        for data_packet in self.processing_queue:
-            data_packet.processing_remaining_time -= 1
-            if data_packet.processing_remaining_time <= 0:
-                data_packet.is_processing = False
-                data_packet.launch_next_flow(start_step=self.model.schedule.steps + 1)
-                self.processing_queue.remove(data_packet)
-
         """Method that executes the events involving the object at each time step."""
+        self._step_processing_data_packets()
+
         if len(self._Service__migrations) > 0 and self._Service__migrations[-1]["end"] == None:
             migration = self._Service__migrations[-1]
 
@@ -267,7 +263,7 @@ class Service(ComponentManager, Agent):
                 for user in users:
                     user.set_communication_path(app)
 
-    def provision(self, target_server: object):
+    def provision(self, target_server: "EdgeServer"):
         """Starts the service's provisioning process. This process comprises both placement and migration. In the former, the
         service is not initially hosted by any server within the infrastructure. In the latter, the service is already being
         hosted by a server and we want to relocate it to another server within the infrastructure.
@@ -331,9 +327,22 @@ class Service(ComponentManager, Agent):
         )
 
     def start_processing(self, data_packet: "DataPacket"):
+        """Starts processing a data packet.
 
+        Args:
+            data_packet (DataPacket): Data packet to process.
+        """
         data_packet.is_processing = True
         data_packet.processing_remaining_time = self.processing_time
         data_packet.size = self.processing_output
 
         self.processing_queue.append(data_packet)
+
+    def _step_processing_data_packets(self):
+        """Processes the data packets that are currently being processed by this service."""
+        for data_packet in self.processing_queue:
+            data_packet.processing_remaining_time -= 1
+            if data_packet.processing_remaining_time <= 0:
+                data_packet.is_processing = False
+                data_packet.launch_next_flow(start_step=self.model.schedule.steps + 1)
+                self.processing_queue.remove(data_packet)

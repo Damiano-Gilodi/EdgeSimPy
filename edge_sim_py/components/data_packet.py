@@ -10,7 +10,7 @@ from edge_sim_py.components.network_flow import NetworkFlow
 # Mesa modules
 from mesa import Agent  # type: ignore[import]
 
-from edge_sim_py.components.network_switch import NetworkSwitch  # type: ignore[import]
+from edge_sim_py.components.network_switch import NetworkSwitch
 
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
