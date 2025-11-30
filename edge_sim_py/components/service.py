@@ -323,4 +323,9 @@ class Service(ComponentManager, Agent):
         )
 
     def start_processing(self, data_packet: "DataPacket"):
-        pass
+
+        data_packet.is_processing = True
+        data_packet.processing_remaining_time = self.processing_time
+        data_packet.size = self.processing_output
+
+        self.processing_queue.append(data_packet)
