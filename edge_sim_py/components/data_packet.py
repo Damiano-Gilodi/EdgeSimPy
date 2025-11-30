@@ -10,10 +10,11 @@ from edge_sim_py.components.network_flow import NetworkFlow
 # Mesa modules
 from mesa import Agent  # type: ignore[import]
 
+from edge_sim_py.components.network_switch import NetworkSwitch  # type: ignore[import]
+
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
     from edge_sim_py.components.user import User
-    from edge_sim_py.components.service import Service
 
 
 @dataclass(frozen=True)
@@ -168,3 +169,19 @@ class DataPacket(ComponentManager, Agent):
             self.current_link = link + 1
             self.launch_next_flow(start_step=flow.end)
             return
+
+        # In last node hop
+        if hop + 1 < len(self.total_path):
+
+            service = self.application.services[hop]
+            switch_id = self.total_path[hop + 1][0]
+
+            switch = NetworkSwitch.find_by_id(switch_id)
+            servers = switch.edge_servers
+
+            for server in servers:
+                if server == service.server:
+                    service.start_processing(data_packet=self)
+
+            self.current_hop = hop + 1
+            self.current_link = 0
