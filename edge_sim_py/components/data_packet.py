@@ -158,4 +158,12 @@ class DataPacket(ComponentManager, Agent):
 
     def on_flow_finished(self, flow: "NetworkFlow"):
 
-        return
+        hop = flow.metadata["index_hop"]
+        link = flow.metadata["index_link"]
+
+        # In intermediate node
+        if link + 1 < len(self.total_path[hop]) - 1:
+            self.current_hop = hop
+            self.current_link = link + 1
+            self.launch_next_flow(start_step=flow.end)
+            return
