@@ -4,6 +4,7 @@ import pytest
 
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket, LinkHop
+from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.network_switch import NetworkSwitch
 from edge_sim_py.components.user import User
 
@@ -130,3 +131,19 @@ def test_launch_next_flow():
         )
 
         dp.application.model.initialize_agent.assert_called_once_with(mock_flow.return_value)
+
+
+def test_on_flow_finished_intermediate_node():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 0, "index_link": 1}
+    flow.end = 3
+
+    with patch.object(dp, "launch_next_flow") as mock_launch:
+
+        dp.on_flow_finished(flow)
+
+        mock_launch.assert_called_once_with(start_step=3)

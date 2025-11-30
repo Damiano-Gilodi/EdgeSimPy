@@ -155,3 +155,7 @@ class DataPacket(ComponentManager, Agent):
         )
 
         self.application.model.initialize_agent(flow)
+
+    def on_flow_finished(self, flow: "NetworkFlow"):
+
+        return
