@@ -327,19 +327,5 @@ class User(ComponentManager, Agent):
             self.set_communication_path(app=app)
         dp = app.register_data_packet(user=self, size=dp_size)
 
-        index_hop = 0
-        index_link = 0
         # Starting the network flow to transfer the data packet
-        NetworkFlow(
-            source=dp.total_path[index_hop][index_link],
-            target=dp.total_path[index_hop][index_link + 1],
-            path=dp.total_path[index_hop][index_link : index_link + 2],
-            start=current_step,
-            data_to_transfer=dp.size,
-            metadata={
-                "type": "data_packet",
-                "object": dp,
-                "index_hop": index_hop,
-                "index_link": index_link,
-            },
-        )
+        dp.launch_next_flow(start_step=current_step)
