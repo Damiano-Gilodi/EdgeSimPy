@@ -13,6 +13,7 @@ from mesa import Agent  # type: ignore[import]
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
     from edge_sim_py.components.user import User
+    from edge_sim_py.components.service import Service
 
 
 @dataclass(frozen=True)

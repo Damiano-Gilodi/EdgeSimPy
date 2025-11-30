@@ -1,6 +1,7 @@
 """Contains service-related functionality."""
 
 # EdgeSimPy components
+from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.container_image import ContainerImage
 from edge_sim_py.components.container_layer import ContainerLayer
@@ -11,6 +12,9 @@ from mesa import Agent
 
 # Python libraries
 import networkx as nx
+
+if TYPE_CHECKING:
+    from edge_sim_py.components.data_packet import DataPacket
 
 
 class Service(ComponentManager, Agent):
@@ -310,3 +314,6 @@ class Service(ComponentManager, Agent):
                 "migrating_service_state_time": 0,
             }
         )
+
+    def start_processing(self, data_packet: "DataPacket"):
+        pass
