@@ -11,6 +11,7 @@ from edge_sim_py.components.network_flow import NetworkFlow
 from mesa import Agent  # type: ignore[import]
 
 from edge_sim_py.components.network_switch import NetworkSwitch
+from edge_sim_py.components.service import Service
 
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
@@ -192,12 +193,15 @@ class DataPacket(ComponentManager, Agent):
 
             for server in servers:
                 if server == service.server:
+
+                    self.add_link_hop(flow, service=service)
+
                     service.start_processing(data_packet=self)
 
             self.current_hop = hop + 1
             self.current_link = 0
 
-    def add_link_hop(self, flow: NetworkFlow):
+    def add_link_hop(self, flow: NetworkFlow, service: "Service" = None):
 
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
@@ -211,13 +215,13 @@ class DataPacket(ComponentManager, Agent):
             end_time=flow.end,
             queue_delay=flow.queue_delay,
             transmission_delay=flow.end - flow.start,
-            processing_delay=0,
+            processing_delay=service.processing_time if service else 0,
             propagation_delay=flow.topology[flow.path[0]][flow.path[1]]["delay"],
             min_bandwidth=min(flow.bandwidth_history),
             max_bandwidth=max(flow.bandwidth_history),
             avg_bandwidth=sum(flow.bandwidth_history) / len(flow.bandwidth_history),
             data_input=self.size,
-            data_output=self.size,
+            data_output=service.processing_output if service else self.size,
         )
 
         self._link_hops.append(link_hop)
