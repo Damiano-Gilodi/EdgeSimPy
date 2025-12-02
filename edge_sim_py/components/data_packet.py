@@ -23,15 +23,22 @@ class LinkHop:
 
     hop_index: int
     link_index: int
+
     source: str
     target: str
+
     start_time: float
     end_time: float
+
     queue_delay: float
     transmission_delay: float
     processing_delay: float
     propagation_delay: float
-    bandwidth: float
+
+    min_bandwidth: float
+    max_bandwidth: float
+    avg_bandwidth: float
+
     data_input: int
     data_output: int
 
@@ -135,9 +142,6 @@ class DataPacket(ComponentManager, Agent):
         }
         return metrics
 
-    def add_link_hop(self, link_hop: LinkHop):
-        self._link_hops.append(link_hop)
-
     def getHops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
 
@@ -162,13 +166,16 @@ class DataPacket(ComponentManager, Agent):
 
         self.application.model.initialize_agent(flow)
 
-    def on_flow_finished(self, flow: "NetworkFlow"):
+    def on_flow_finished(self, flow: NetworkFlow):
 
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
 
         # In intermediate node
         if link + 1 < len(self.total_path[hop]) - 1:
+
+            self.add_link_hop(flow)
+
             self.current_hop = hop
             self.current_link = link + 1
             self.launch_next_flow(start_step=flow.end)
@@ -189,3 +196,28 @@ class DataPacket(ComponentManager, Agent):
 
             self.current_hop = hop + 1
             self.current_link = 0
+
+    def add_link_hop(self, flow: NetworkFlow):
+
+        hop = flow.metadata["index_hop"]
+        link = flow.metadata["index_link"]
+
+        link_hop = LinkHop(
+            hop_index=hop,
+            link_index=link,
+            source=str(flow.source.id),
+            target=str(flow.target.id),
+            start_time=flow.start,
+            end_time=flow.end,
+            queue_delay=flow.queue_delay,
+            transmission_delay=flow.end - flow.start,
+            processing_delay=0,
+            propagation_delay=flow.topology[flow.path[0]][flow.path[1]]["delay"],
+            min_bandwidth=min(flow.bandwidth_history),
+            max_bandwidth=max(flow.bandwidth_history),
+            avg_bandwidth=sum(flow.bandwidth_history) / len(flow.bandwidth_history),
+            data_input=self.size,
+            data_output=self.size,
+        )
+
+        self._link_hops.append(link_hop)

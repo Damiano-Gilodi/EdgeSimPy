@@ -65,6 +65,7 @@ class NetworkFlow(ComponentManager, Agent):
         # Network capacity available to the flow
         self.bandwidth = {}
         self.last_updated_bandwidth = {}
+        self.bandwidth_history = []
 
         # Temporal information about the flow
         self.start = start
@@ -75,6 +76,9 @@ class NetworkFlow(ComponentManager, Agent):
 
         # Custom flow metadata
         self.metadata = metadata
+
+        # Flow queue delay
+        self.queue_delay = 0
 
         # Adding a reference to the flow inside the network links that comprehend the "path" attribute
         for i in range(0, len(path) - 1):
@@ -140,8 +144,15 @@ class NetworkFlow(ComponentManager, Agent):
         """Method that executes the events involving the object at each time step."""
         if self.status == "active":
             # Updating the flow progress according to the available bandwidth
-            if not any([bw == None for bw in self.bandwidth.values()]):
-                self.data_to_transfer -= min(self.bandwidth.values())
+            if any([bw is None for bw in self.bandwidth.values()]):
+                return
+
+            if min(self.bandwidth.values()) == 0:
+                self.queue_delay += 1
+                return
+
+            self.data_to_transfer -= min(self.bandwidth.values())
+            self.bandwidth_history.append(min(self.bandwidth.values()))
 
             if self.data_to_transfer <= 0:
                 # Updating the completed flow's properties
