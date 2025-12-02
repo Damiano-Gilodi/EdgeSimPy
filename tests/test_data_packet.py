@@ -32,39 +32,6 @@ def test_to_dict():
     }
 
 
-def test_add_hop():
-
-    app = MagicMock(spec=Application)
-    user = MagicMock(spec=User)
-    dp = DataPacket(user=user, application=app, obj_id=1, size=10)
-
-    sw1 = MagicMock(spec=NetworkSwitch)
-    sw1.id = 0
-    sw2 = MagicMock(spec=NetworkSwitch)
-    sw2.id = 1
-
-    link_hop = LinkHop(
-        hop_index=2,
-        link_index=0,
-        source="0",
-        target="1",
-        start_time=0,
-        end_time=3,
-        queue_delay=5,
-        transmission_delay=10,
-        processing_delay=0,
-        propagation_delay=20,
-        bandwidth=100,
-        data_input=10,
-        data_output=10,
-    )
-
-    dp.add_link_hop(link_hop)
-    dp.add_link_hop(link_hop)
-
-    assert dp.getHops() == [link_hop, link_hop]
-
-
 def test_zero_negative_size():
 
     app = MagicMock(spec=Application)
@@ -144,11 +111,14 @@ def test_on_flow_finished_intermediate_node():
     flow.metadata = {"index_hop": 0, "index_link": 1}
     flow.end = 3
 
+    fake_link_hop = MagicMock()
+
     with patch.object(dp, "launch_next_flow") as mock_launch:
+        with patch.object(dp, "add_link_hop", return_value=fake_link_hop):
 
-        dp.on_flow_finished(flow)
+            dp.on_flow_finished(flow)
 
-        mock_launch.assert_called_once_with(start_step=3)
+            mock_launch.assert_called_once_with(start_step=3)
 
 
 def test_on_flow_finished_hop_complete():
@@ -173,3 +143,58 @@ def test_on_flow_finished_hop_complete():
         dp.on_flow_finished(flow)
 
         service.start_processing.assert_called_once_with(data_packet=dp)
+
+
+def test_add_link_hop_intermediate_node():
+
+    app = MagicMock(spec=Application)
+    model = MagicMock()
+    app.model = model
+    service = MagicMock(spec=Service)
+    service.processing_time = 4
+    service.processing_output = 10
+    app.services = [service]
+
+    dp = DataPacket(user=MagicMock(), application=app)
+    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp.size = 5
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 0, "index_link": 1}
+
+    flow.source = MagicMock(spec=NetworkSwitch)
+    flow.target = MagicMock(spec=NetworkSwitch)
+    flow.source.id = 1
+    flow.target.id = 2
+
+    flow.start = 0
+    flow.end = 3
+
+    flow.queue_delay = 3
+
+    flow.path = [1, 2]
+    flow.topology = {1: {2: {"delay": 8}}}
+
+    flow.bandwidth_history = [10, 20, 30]
+
+    link_hop = LinkHop(
+        hop_index=0,
+        link_index=1,
+        source="1",
+        target="2",
+        start_time=0,
+        end_time=3,
+        queue_delay=3,
+        transmission_delay=3,
+        processing_delay=0,
+        propagation_delay=8,
+        min_bandwidth=10,
+        max_bandwidth=30,
+        avg_bandwidth=20,
+        data_input=5,
+        data_output=5,
+    )
+
+    dp.on_flow_finished(flow)
+
+    assert dp.getHops() == [link_hop]
