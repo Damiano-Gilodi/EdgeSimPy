@@ -3,7 +3,6 @@
 # EdgeSimPy components
 import copy
 from dataclasses import asdict
-from email.mime import application
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.data_packet import DataPacket
@@ -152,7 +151,7 @@ class Application(ComponentManager, Agent):
 
         dp = DataPacket(user=user, application=self, size=size)
 
-        dp.total_path = user.communication_paths[str(self.id)]
+        dp.total_path = copy.deepcopy(user.communication_paths[str(self.id)])
 
         if str(user.id) not in self._user_data_packets:
             self._user_data_packets[str(user.id)] = []

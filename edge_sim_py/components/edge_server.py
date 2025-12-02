@@ -8,10 +8,10 @@ from edge_sim_py.components.container_image import ContainerImage
 from edge_sim_py.components.container_layer import ContainerLayer
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 # Python libraries
-import networkx as nx
+import networkx as nx  # type: ignore
 import typing
 
 
@@ -19,19 +19,19 @@ class EdgeServer(ComponentManager, Agent):
     """Class that represents an edge server."""
 
     # Class attributes that allow this class to use helper methods from the ComponentManager
-    _instances = []
+    _instances: list["EdgeServer"] = []
     _object_count = 0
 
     def __init__(
         self,
-        obj_id: int = None,
-        coordinates: tuple = None,
+        obj_id: int | None = None,
+        coordinates: tuple | None = None,
         model_name: str = "",
         cpu: int = 0,
         memory: int = 0,
         disk: int = 0,
-        power_model: typing.Callable = None,
-    ) -> object:
+        power_model: typing.Callable | None = None,
+    ):
         """Creates an EdgeServer object.
 
         Args:

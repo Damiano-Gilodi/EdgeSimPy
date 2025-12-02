@@ -44,30 +44,6 @@ def test_zero_negative_size():
         DataPacket(user=user, application=app, size=-1)
 
 
-def test_collect():
-
-    app = MagicMock(spec=Application)
-    app.id = 0
-    user = MagicMock(spec=User)
-    user.id = 0
-
-    dp = DataPacket(user=user, application=app, obj_id=1, size=10)
-
-    assert dp.collect() == {
-        "Id": 1,
-        "Application Id": 0,
-        "User Id": 0,
-        "Size": 10,
-        "Queue delay total": 0,
-        "Transmission delay total": 0,
-        "Processing delay total": 0,
-        "Propagation delay total": 0,
-        "Total delay": 0,
-        "Total path": [],
-        "Hops": [],
-    }
-
-
 def test_launch_next_flow():
 
     app = MagicMock(spec=Application)
@@ -179,8 +155,8 @@ def test_add_link_hop_intermediate_node():
     link_hop = LinkHop(
         hop_index=0,
         link_index=1,
-        source="2",
-        target="3",
+        source=2,
+        target=3,
         start_time=0,
         end_time=3,
         queue_delay=3,
@@ -241,8 +217,8 @@ def test_add_link_hop_complete():
         link_hop = LinkHop(
             hop_index=0,
             link_index=2,
-            source="3",
-            target="4",
+            source=3,
+            target=4,
             start_time=0,
             end_time=3,
             queue_delay=3,

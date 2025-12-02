@@ -52,7 +52,7 @@ class User(ComponentManager, Agent):
         self.applications: list["Application"] = []
 
         # Reference to the base station the user is connected to
-        self.base_station = None
+        self.base_station: "BaseStation" | None = None
 
         # User access metadata
         self.making_requests = {}
@@ -171,7 +171,7 @@ class User(ComponentManager, Agent):
                     self.communication_paths[str(application.id)] = []
                     self._compute_delay(app=application)
 
-    def _compute_delay(self, app: object, metric: str = "latency") -> int:
+    def _compute_delay(self, app: "Application", metric: str = "latency") -> int:
         """Computes the delay of an application accessed by the user.
 
         Args:
@@ -214,7 +214,7 @@ class User(ComponentManager, Agent):
         Returns:
             list: Updated communication path.
         """
-        topology = Topology.first()
+        topology: Topology = Topology.first()  # type: ignore
 
         # Releasing links used in the past to connect the user with its application
         if app in self.communication_paths:
@@ -294,7 +294,7 @@ class User(ComponentManager, Agent):
         self.coordinates_trace = [coordinates for _ in range(number_of_replicates - 1)]
 
         # Connecting the user to the base station that shares his initial position
-        base_station = BaseStation.find_by(attribute_name="coordinates", attribute_value=self.coordinates)
+        base_station: BaseStation = BaseStation.find_by(attribute_name="coordinates", attribute_value=self.coordinates)  # type: ignore
 
         if base_station is None:
             raise Exception(f"No base station was found at coordinates {coordinates} to connect to user {self}.")

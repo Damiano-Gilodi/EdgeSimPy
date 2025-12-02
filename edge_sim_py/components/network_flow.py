@@ -1,22 +1,23 @@
 """Contains network-flow-related functionality."""
 
 # EdgeSimPy components
+from typing import Any
 from edge_sim_py.component_manager import ComponentManager
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 
 class NetworkFlow(ComponentManager, Agent):
     """Class that represents a network flow."""
 
     # Class attributes that allow this class to use helper methods from the ComponentManager
-    _instances = []
+    _instances: list["NetworkFlow"] = []
     _object_count = 0
 
     def __init__(
         self,
-        obj_id: int = None,
+        obj_id: int | None = None,
         topology: object = None,
         status: str = "active",
         source: object = None,
@@ -52,7 +53,17 @@ class NetworkFlow(ComponentManager, Agent):
         self.id = obj_id
 
         # Reference to the network topology object
-        self.topology = topology
+        # topology = {
+        #   1: {
+        #       2: {"id": 1, "delay": 10, "active_flows": [...]},
+        #       3: {"id": 3, "delay": 10, "active_flows": [...]}
+        #   },
+        #   2: {
+        #       3: {"id": 6, "delay": 10, "active_flows": [...]}
+        #   }
+        # }
+        # topology[1][2]["delay"] = 10
+        self.topology: dict[int, dict[int, dict[str, Any]]] = topology
 
         # Flow status. Valid options: "active" (default) and "finished"
         self.status = status
@@ -63,13 +74,13 @@ class NetworkFlow(ComponentManager, Agent):
         self.path = path
 
         # Network capacity available to the flow
-        self.bandwidth = {}
-        self.last_updated_bandwidth = {}
-        self.bandwidth_history = []
+        self.bandwidth: dict[int, float] = {}
+        self.last_updated_bandwidth: dict[int, float] = {}
+        self.bandwidth_history: list[float] = []
 
         # Temporal information about the flow
         self.start = start
-        self.end = None
+        self.end: int | None = None
 
         # Amount of data transferred by the flow
         self.data_to_transfer = data_to_transfer
@@ -117,7 +128,7 @@ class NetworkFlow(ComponentManager, Agent):
             metrics (dict): Object metrics.
         """
         bw = list(self.bandwidth.values())
-        actual_bw = min(bw) if len([bw for bw in self.bandwidth.values() if bw == None]) == 0 else None
+        actual_bw = min(bw) if len([bw for bw in self.bandwidth.values() if bw is None]) == 0 else None
 
         if self.metadata["type"] == "layer":
             object_being_transferred = f"{str(self.metadata['object'])} ({self.metadata['object'].instruction})"

@@ -4,17 +4,17 @@
 from edge_sim_py.component_manager import ComponentManager
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 
 class BaseStation(ComponentManager, Agent):
     """Class that represents a base station."""
 
     # Class attributes that allow this class to use helper methods from ComponentManager
-    _instances = []
+    _instances: list["BaseStation"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None) -> object:
+    def __init__(self, obj_id: int | None = None):
         """Creates a BaseStation object.
 
         Args:

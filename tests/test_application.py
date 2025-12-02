@@ -37,8 +37,8 @@ def test_collect_with_data_packet():
     link_hop = LinkHop(
         hop_index=0,
         link_index=2,
-        source="3",
-        target="4",
+        source=3,
+        target=4,
         start_time=0,
         end_time=3,
         queue_delay=3,
@@ -84,8 +84,8 @@ def test_collect_with_data_packet():
                         {
                             "hop_index": 0,
                             "link_index": 2,
-                            "source": "3",
-                            "target": "4",
+                            "source": 3,
+                            "target": 4,
                             "start_time": 0,
                             "end_time": 3,
                             "queue_delay": 3,

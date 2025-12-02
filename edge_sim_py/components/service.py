@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from edge_sim_py.components.data_packet import DataPacket
     from edge_sim_py.components.user import User
     from edge_sim_py.components.edge_server import EdgeServer
+    from edge_sim_py.components.application import Application
 
 
 class Service(ComponentManager, Agent):
@@ -73,10 +74,10 @@ class Service(ComponentManager, Agent):
         self.state = state
 
         # Server that hosts the service
-        self.server: "EdgeServer" | None = None
+        self.server: "EdgeServer | None" = None
 
         # Application to whom the service belongs
-        self.application = None
+        self.application: "Application | None" = None
 
         # List of users that access the service
         self.users: list["User"] = []

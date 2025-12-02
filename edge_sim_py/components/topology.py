@@ -5,20 +5,20 @@ from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow
 
 # Mesa modules
-from mesa import Agent
+from mesa import Agent  # type: ignore
 
 # Python libraries
-import networkx as nx
+import networkx as nx  # type: ignore
 
 
 class Topology(ComponentManager, nx.Graph, Agent):
     """Class that represents a network topology."""
 
     # Class attributes that allow this class to use helper methods from ComponentManager
-    _instances = []
+    _instances: list["Topology"] = []
     _object_count = 0
 
-    def __init__(self, obj_id: int = None, existing_graph: nx.Graph = None) -> object:
+    def __init__(self, obj_id: int | None = None, existing_graph: nx.Graph = None):
         """Creates a Topology object backed by NetworkX functionality.
 
         Args:
@@ -62,7 +62,7 @@ class Topology(ComponentManager, nx.Graph, Agent):
         Returns:
             metrics (dict): Object metrics.
         """
-        metrics = {}
+        metrics: dict = {}
         return metrics
 
     def step(self):
@@ -78,7 +78,7 @@ class Topology(ComponentManager, nx.Graph, Agent):
         Returns:
             modified_path (list): Modified network path without duplicates.
         """
-        modified_path = []
+        modified_path: list = []
 
         for i in range(len(path)):
             if len(modified_path) == 0 or len(modified_path) >= 1 and modified_path[-1] != path[i]:

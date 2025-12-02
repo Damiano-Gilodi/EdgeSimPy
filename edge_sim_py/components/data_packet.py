@@ -2,7 +2,7 @@
 
 # EdgeSimPy components
 import copy
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow
@@ -25,16 +25,16 @@ class LinkHop:
     hop_index: int
     link_index: int
 
-    source: str
-    target: str
+    source: int
+    target: int
 
-    start_time: float
-    end_time: float
+    start_time: int
+    end_time: int
 
-    queue_delay: float
-    transmission_delay: float
-    processing_delay: float
-    propagation_delay: float
+    queue_delay: int
+    transmission_delay: int
+    processing_delay: int
+    propagation_delay: int
 
     min_bandwidth: float
     max_bandwidth: float
@@ -122,27 +122,6 @@ class DataPacket(ComponentManager, Agent):
         }
         return dictionary
 
-    def collect(self) -> dict:
-        """Method that collects a set of metrics for the object.
-
-        Returns:
-            metrics (dict): Object metrics.
-        """
-        metrics = {
-            "Id": self.id,
-            "Application Id": self.application.id,
-            "User Id": self.user.id,
-            "Size": self.size,
-            "Queue delay total": self._queue_delay_total,
-            "Transmission delay total": self._transmission_delay_total,
-            "Processing delay total": self._processing_delay_total,
-            "Propagation delay total": self._propagation_delay_total,
-            "Total delay": self._total_delay,
-            "Total path": self.total_path,
-            "Hops": [asdict(hop) for hop in self._link_hops],
-        }
-        return metrics
-
     def getHops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
 
@@ -201,7 +180,7 @@ class DataPacket(ComponentManager, Agent):
             self.current_hop = hop + 1
             self.current_link = 0
 
-    def add_link_hop(self, flow: NetworkFlow, service: "Service" = None):
+    def add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
 
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
@@ -209,8 +188,8 @@ class DataPacket(ComponentManager, Agent):
         link_hop = LinkHop(
             hop_index=hop,
             link_index=link,
-            source=str(flow.source.id),
-            target=str(flow.target.id),
+            source=flow.source.id,
+            target=flow.target.id,
             start_time=flow.start,
             end_time=flow.end,
             queue_delay=flow.queue_delay,
