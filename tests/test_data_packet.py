@@ -138,11 +138,14 @@ def test_on_flow_finished_hop_complete():
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 2}
 
+    fake_link_hop = MagicMock()
+
     with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
+        with patch.object(dp, "add_link_hop", return_value=fake_link_hop):
 
-        dp.on_flow_finished(flow)
+            dp.on_flow_finished(flow)
 
-        service.start_processing.assert_called_once_with(data_packet=dp)
+            service.start_processing.assert_called_once_with(data_packet=dp)
 
 
 def test_add_link_hop_intermediate_node():
@@ -150,10 +153,6 @@ def test_add_link_hop_intermediate_node():
     app = MagicMock(spec=Application)
     model = MagicMock()
     app.model = model
-    service = MagicMock(spec=Service)
-    service.processing_time = 4
-    service.processing_output = 10
-    app.services = [service]
 
     dp = DataPacket(user=MagicMock(), application=app)
     dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
@@ -164,24 +163,24 @@ def test_add_link_hop_intermediate_node():
 
     flow.source = MagicMock(spec=NetworkSwitch)
     flow.target = MagicMock(spec=NetworkSwitch)
-    flow.source.id = 1
-    flow.target.id = 2
+    flow.source.id = 2
+    flow.target.id = 3
 
     flow.start = 0
     flow.end = 3
 
     flow.queue_delay = 3
 
-    flow.path = [1, 2]
-    flow.topology = {1: {2: {"delay": 8}}}
+    flow.path = [2, 3]
+    flow.topology = {2: {3: {"delay": 8}}}
 
     flow.bandwidth_history = [10, 20, 30]
 
     link_hop = LinkHop(
         hop_index=0,
         link_index=1,
-        source="1",
-        target="2",
+        source="2",
+        target="3",
         start_time=0,
         end_time=3,
         queue_delay=3,
@@ -198,3 +197,65 @@ def test_add_link_hop_intermediate_node():
     dp.on_flow_finished(flow)
 
     assert dp.getHops() == [link_hop]
+
+
+def test_add_link_hop_complete():
+
+    app = MagicMock(spec=Application)
+    model = MagicMock()
+    app.model = model
+    service = MagicMock(spec=Service)
+    service.processing_time = 4
+    service.processing_output = 10
+    app.services = [service]
+
+    dp = DataPacket(user=MagicMock(), application=app)
+    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp.size = 5
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 0, "index_link": 2}
+
+    flow.source = MagicMock(spec=NetworkSwitch)
+    flow.target = MagicMock(spec=NetworkSwitch)
+    flow.source.id = 3
+    flow.target.id = 4
+
+    flow.start = 0
+    flow.end = 3
+
+    flow.queue_delay = 3
+
+    flow.path = [3, 4]
+    flow.topology = {3: {4: {"delay": 8}}}
+
+    flow.bandwidth_history = [10, 20, 30]
+
+    server = MagicMock(spec=EdgeServer)
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.edge_servers = [server]
+    service.server = server
+
+    with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
+
+        link_hop = LinkHop(
+            hop_index=0,
+            link_index=2,
+            source="3",
+            target="4",
+            start_time=0,
+            end_time=3,
+            queue_delay=3,
+            transmission_delay=3,
+            processing_delay=4,
+            propagation_delay=8,
+            min_bandwidth=10,
+            max_bandwidth=30,
+            avg_bandwidth=20,
+            data_input=5,
+            data_output=10,
+        )
+
+        dp.on_flow_finished(flow)
+
+        assert dp.getHops() == [link_hop]
