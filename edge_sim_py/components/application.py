@@ -2,6 +2,7 @@
 
 # EdgeSimPy components
 import copy
+from dataclasses import asdict
 from email.mime import application
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
@@ -81,13 +82,38 @@ class Application(ComponentManager, Agent):
         Returns:
             metrics (dict): Object metrics.
         """
+        """Collects metrics for the application and its datapackets in an optimized way."""
+        user_data_packets_metrics = {}
+
+        for user_id, packets in self._user_data_packets.items():
+            user_metrics = []
+            for dp in packets:
+
+                hops_serialized = [asdict(hop) for hop in dp._link_hops]
+
+                dp_metrics = {
+                    "Id": dp.id,
+                    "User": dp.user.id,
+                    "Queue Delay": dp._queue_delay_total,
+                    "Transmission Delay": dp._transmission_delay_total,
+                    "Processing Delay": dp._processing_delay_total,
+                    "Propagation Delay": dp._propagation_delay_total,
+                    "Total Delay": dp._total_delay,
+                    "Total Path": dp.total_path,
+                    "Hops": hops_serialized,
+                }
+                user_metrics.append(dp_metrics)
+
+            user_data_packets_metrics[user_id] = user_metrics
+
         metrics = {
             "Id": self.id,
             "Label": self.label,
-            "Services": copy.deepcopy(self.services),
-            "Users": copy.deepcopy(self.users),
-            "Data packets": copy.deepcopy(self._user_data_packets),
+            "Services": [service.id for service in self.services],
+            "Users": [user.id for user in self.users],
+            "Data packets": user_data_packets_metrics,
         }
+
         return metrics
 
     def step(self):
