@@ -339,4 +339,9 @@ class User(ComponentManager, Agent):
         dp.launch_next_flow(start_step=current_step)
 
     def set_packet_size_strategy(self, mode: str, size: int = 0, min: int = 0, max: int = 0):
-        return
+        self.packet_size_strategy = {
+            "mode": mode,
+            "size": size,
+            "min": min,
+            "max": max,
+        }
