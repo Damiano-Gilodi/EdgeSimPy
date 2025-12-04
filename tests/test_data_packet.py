@@ -116,6 +116,36 @@ def test_on_flow_finished_validation_link():
         dp._on_flow_finished(flow)
 
 
+def test_on_flow_finished_last_link_hop():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+
+    switch = MagicMock(spec=NetworkSwitch)
+    server = MagicMock(spec=EdgeServer)
+    switch.edge_servers = [server]
+    switch.id = 6
+
+    service = MagicMock(spec=Service)
+    service.server = server
+
+    dp.application.services = [MagicMock(), service]
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 1, "index_link": 1}
+
+    fake_link_hop = MagicMock()
+
+    with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id") as mock_find:
+        mock_find.return_value = switch
+        with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
+
+            dp._on_flow_finished(flow)
+
+            mock_find.assert_called_once_with(6)
+            service._start_processing.assert_called_once_with(data_packet=dp)
+
+
 def test_add_link_hop_intermediate_node():
 
     app = MagicMock(spec=Application)
