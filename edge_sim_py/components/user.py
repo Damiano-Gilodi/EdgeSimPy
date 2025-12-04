@@ -312,18 +312,6 @@ class User(ComponentManager, Agent):
         self.base_station = base_station
         base_station.users.append(self)
 
-    def _generate_request_size(self, min_size: int = 1, max_size: int = 100) -> int:
-        """Generates the size of a data packet requested by the user.
-
-        Args:
-            min_size (int, optional): Minimum size of the data packet in bytes. Defaults to 1.
-            max_size (int, optional): Maximum size of the data packet in bytes. Defaults to 100.
-
-        Returns:
-            int: Size of the data packet requested by the user in bytes.
-        """
-        return random.randint(min_size, max_size)
-
     def _start_flow(self, app: "Application", current_step: int):
         """Starts a network flow to transfer a data packet from the user to its application.
 
@@ -331,15 +319,22 @@ class User(ComponentManager, Agent):
             app (Application): Application accessed by the user.
         """
         # Generating data packet requested by the user
-        dp_size = self._generate_request_size()
         if str(app.id) not in self.communication_paths:
             self.set_communication_path(app=app)
-        dp = app.register_data_packet(user=self, size=dp_size)
+        dp = self._generate_datapacket(app=app)
 
         # Starting the network flow to transfer the data packet
         dp.launch_next_flow(start_step=current_step)
 
     def set_packet_size_strategy(self, mode: str, size: int = 0, min: int = 0, max: int = 0):
+        """Sets the packet size strategy for the user.
+
+        Args:
+            mode (str): Packet size strategy mode. Mode: "fixed" or "random".
+            size (int, optional): Fixed packet size. Defaults to 0.
+            min (int, optional): Random minimum packet size. Defaults to 0.
+            max (int, optional): Random maximum packet size. Defaults to 0.
+        """
         self.packet_size_strategy = {
             "mode": mode,
             "size": size,
@@ -348,6 +343,14 @@ class User(ComponentManager, Agent):
         }
 
     def _generate_datapacket(self, app: "Application") -> "DataPacket":
+        """Generates a data packet for the user.
+
+        Args:
+            app (Application): Application accessed by the user.
+
+        Returns:
+            DataPacket: Generated data packet.
+        """
 
         size = 0
         mode = self.packet_size_strategy["mode"]

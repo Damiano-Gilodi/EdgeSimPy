@@ -1,7 +1,4 @@
-import random
 from unittest.mock import MagicMock, patch
-
-from numpy import size
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket
 from edge_sim_py.components.user import User
@@ -14,7 +11,7 @@ def test_user_start_flow():
     app.id = 1
     mock_dp = MagicMock(spec=DataPacket)
 
-    with patch.object(app, "register_data_packet", return_value=mock_dp):
+    with patch.object(user, "_generate_datapacket", return_value=mock_dp):
         with patch.object(user, "set_communication_path", return_value=MagicMock()):
 
             user._start_flow(app, current_step=0)
