@@ -67,6 +67,15 @@ class User(ComponentManager, Agent):
         self.delays = {}
         self.delay_slas = {}
 
+        # Size strategy to generate data packets.
+        # Possible mode values: "fixed" or "random"
+        self.packet_size_strategy = {
+            "mode": "",
+            "size": 0,
+            "min": 0,
+            "max": 0,
+        }
+
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
         self.unique_id = None
@@ -328,3 +337,6 @@ class User(ComponentManager, Agent):
 
         # Starting the network flow to transfer the data packet
         dp.launch_next_flow(start_step=current_step)
+
+    def set_packet_size_strategy(self, mode: str, size: int = 0, min: int = 0, max: int = 0):
+        return
