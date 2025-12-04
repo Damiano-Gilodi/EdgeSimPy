@@ -154,6 +154,9 @@ class DataPacket(ComponentManager, Agent):
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
 
+        if link >= len(self._total_path[hop]) - 1:
+            raise IndexError("Index link out of range.")
+
         # In intermediate node
         if link + 1 < len(self._total_path[hop]) - 1:
 
