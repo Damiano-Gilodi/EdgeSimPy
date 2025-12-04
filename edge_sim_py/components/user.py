@@ -345,3 +345,6 @@ class User(ComponentManager, Agent):
             "min": min,
             "max": max,
         }
+
+    def _generate_datapacket(self, app: "Application"):
+        return
