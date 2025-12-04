@@ -91,36 +91,18 @@ class DataPacket(ComponentManager, Agent):
         self._total_delay = 0
 
         # Total path (list of hop nodes between services)
-        self.total_path: list[list[int]] = []
+        self._total_path: list[list[int]] = []
 
         # Hops
-        self.current_hop = 0
-        self.current_link = 0
+        self._current_hop = 0
+        self._current_link = 0
 
         # Processing
-        self.is_processing = False
-        self.processing_remaining_time = 0
+        self._is_processing = False
+        self._processing_remaining_time = 0
 
         # Hops
         self._link_hops: list = []
-
-    def _to_dict(self) -> dict:
-        """Method that overrides the way the object is formatted to JSON."
-
-        Returns:
-            dict: JSON-friendly representation of the object as a dictionary.
-        """
-        dictionary = {
-            "attributes": {
-                "id": self.id,
-                "size": self.size,
-            },
-            "relationships": {
-                "application": {"class": type(self.application).__name__, "id": self.application.id} if self.application else None,
-                "user": {"class": type(self.user).__name__, "id": self.user.id} if self.user else None,
-            },
-        }
-        return dictionary
 
     def getHops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
@@ -131,14 +113,14 @@ class DataPacket(ComponentManager, Agent):
         Args:
             start_step (int): Time step in which the flow started.
         """
-        hop = self.current_hop
-        link = self.current_link
+        hop = self._current_hop
+        link = self._current_link
 
         flow = NetworkFlow(
             topology=self.application.model.topology,
-            source=self.total_path[hop][link],
-            target=self.total_path[hop][link + 1],
-            path=self.total_path[hop][link : link + 2],
+            source=self._total_path[hop][link],
+            target=self._total_path[hop][link + 1],
+            path=self._total_path[hop][link : link + 2],
             start=start_step,
             data_to_transfer=self.size,
             metadata={"type": "data_packet", "object": self, "index_hop": hop, "index_link": link},
@@ -157,20 +139,20 @@ class DataPacket(ComponentManager, Agent):
         link = flow.metadata["index_link"]
 
         # In intermediate node
-        if link + 1 < len(self.total_path[hop]) - 1:
+        if link + 1 < len(self._total_path[hop]) - 1:
 
             self._add_link_hop(flow)
 
-            self.current_hop = hop
-            self.current_link = link + 1
+            self._current_hop = hop
+            self._current_link = link + 1
             self._launch_next_flow(start_step=flow.end)
             return
 
         # In last node hop
-        if hop + 1 < len(self.total_path):
+        if hop + 1 < len(self._total_path):
 
             service: "Service" = self.application.services[hop]
-            switch_id = self.total_path[hop + 1][0]
+            switch_id = self._total_path[hop + 1][0]
 
             switch = NetworkSwitch.find_by_id(switch_id)
             servers = switch.edge_servers
@@ -182,8 +164,8 @@ class DataPacket(ComponentManager, Agent):
 
                     service._start_processing(data_packet=self)
 
-            self.current_hop = hop + 1
-            self.current_link = 0
+            self._current_hop = hop + 1
+            self._current_link = 0
 
     def _add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
         """Method that adds a link hop to the data packet.
@@ -203,13 +185,13 @@ class DataPacket(ComponentManager, Agent):
             target=flow.target.id,
             start_time=flow.start,
             end_time=flow.end,
-            queue_delay=flow.queue_delay,
+            queue_delay=flow._queue_delay,
             transmission_delay=flow.end - flow.start,
             processing_delay=service.processing_time if service else 0,
             propagation_delay=flow.topology[flow.path[0]][flow.path[1]]["delay"],
-            min_bandwidth=min(flow.bandwidth_history),
-            max_bandwidth=max(flow.bandwidth_history),
-            avg_bandwidth=sum(flow.bandwidth_history) / len(flow.bandwidth_history),
+            min_bandwidth=min(flow._bandwidth_history),
+            max_bandwidth=max(flow._bandwidth_history),
+            avg_bandwidth=sum(flow._bandwidth_history) / len(flow._bandwidth_history),
             data_input=self.size,
             data_output=service.processing_output if service else self.size,
         )

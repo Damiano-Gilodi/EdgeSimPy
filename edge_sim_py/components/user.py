@@ -361,7 +361,7 @@ class User(ComponentManager, Agent):
         # Defining communication path
         if str(app.id) not in self.communication_paths:
             self.set_communication_path(app=app)
-        dp.total_path = copy.deepcopy(self.communication_paths[str(app.id)])
+        dp._total_path = copy.deepcopy(self.communication_paths[str(app.id)])
 
         # Starting the network flow to transfer the data packet
         dp._launch_next_flow(start_step=current_step)

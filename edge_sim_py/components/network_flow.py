@@ -76,7 +76,7 @@ class NetworkFlow(ComponentManager, Agent):
         # Network capacity available to the flow
         self.bandwidth: dict[int, float] = {}
         self.last_updated_bandwidth: dict[int, float] = {}
-        self.bandwidth_history: list[float] = []
+        self._bandwidth_history: list[float] = []
 
         # Temporal information about the flow
         self.start = start
@@ -89,7 +89,7 @@ class NetworkFlow(ComponentManager, Agent):
         self.metadata = metadata
 
         # Flow queue delay
-        self.queue_delay = 0
+        self._queue_delay = 0
 
         # Adding a reference to the flow inside the network links that comprehend the "path" attribute
         for i in range(0, len(path) - 1):
@@ -159,11 +159,11 @@ class NetworkFlow(ComponentManager, Agent):
                 return
 
             if min(self.bandwidth.values()) == 0:
-                self.queue_delay += 1
+                self._queue_delay += 1
                 return
 
             self.data_to_transfer -= min(self.bandwidth.values())
-            self.bandwidth_history.append(min(self.bandwidth.values()))
+            self._bandwidth_history.append(min(self.bandwidth.values()))
 
             if self.data_to_transfer <= 0:
                 # Updating the completed flow's properties

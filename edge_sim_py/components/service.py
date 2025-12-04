@@ -92,7 +92,7 @@ class Service(ComponentManager, Agent):
         # Processing
         self.processing_time = processing_time
         self.processing_output = processing_output
-        self.processing_queue: list["DataPacket"] = []
+        self._processing_queue: list["DataPacket"] = []
 
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
@@ -335,17 +335,17 @@ class Service(ComponentManager, Agent):
         Args:
             data_packet (DataPacket): Data packet to process.
         """
-        data_packet.is_processing = True
-        data_packet.processing_remaining_time = self.processing_time
+        data_packet._is_processing = True
+        data_packet._processing_remaining_time = self.processing_time
         data_packet.size = self.processing_output
 
-        self.processing_queue.append(data_packet)
+        self._processing_queue.append(data_packet)
 
     def _step_processing_data_packets(self):
         """Processes the data packets that are currently being processed by this service."""
-        for data_packet in self.processing_queue:
-            data_packet.processing_remaining_time -= 1
-            if data_packet.processing_remaining_time <= 0:
-                data_packet.is_processing = False
+        for data_packet in self._processing_queue:
+            data_packet._processing_remaining_time -= 1
+            if data_packet._processing_remaining_time <= 0:
+                data_packet._is_processing = False
                 data_packet._launch_next_flow(start_step=self.model.schedule.steps + 1)
-                self.processing_queue.remove(data_packet)
+                self._processing_queue.remove(data_packet)

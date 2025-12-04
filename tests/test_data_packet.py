@@ -11,27 +11,6 @@ from edge_sim_py.components.service import Service
 from edge_sim_py.components.user import User
 
 
-def test_to_dict():
-
-    app = MagicMock(spec=Application)
-    app.id = 0
-    user = MagicMock(spec=User)
-    user.id = 0
-
-    dp = DataPacket(user=user, application=app, obj_id=1, size=10)
-
-    assert dp._to_dict() == {
-        "attributes": {
-            "id": 1,
-            "size": 10,
-        },
-        "relationships": {
-            "application": {"class": type(app).__name__, "id": 0},
-            "user": {"class": type(user).__name__, "id": 0},
-        },
-    }
-
-
 def test_zero_negative_size():
 
     app = MagicMock(spec=Application)
@@ -51,10 +30,10 @@ def test_launch_next_flow():
     app.model = model
 
     dp = DataPacket(user=MagicMock(), application=app)
-    dp.total_path = [[1, 2, 3], [4, 5, 6]]
+    dp._total_path = [[1, 2, 3], [4, 5, 6]]
     dp.size = 50
-    dp.current_hop = 0
-    dp.current_link = 1
+    dp._current_hop = 0
+    dp._current_link = 1
 
     with patch("edge_sim_py.components.data_packet.NetworkFlow") as mock_flow:
 
@@ -81,7 +60,7 @@ def test_launch_next_flow():
 def test_on_flow_finished_intermediate_node():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
 
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 1}
@@ -100,7 +79,7 @@ def test_on_flow_finished_intermediate_node():
 def test_on_flow_finished_hop_complete():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
 
     switch = MagicMock(spec=NetworkSwitch)
     server = MagicMock(spec=EdgeServer)
@@ -131,7 +110,7 @@ def test_add_link_hop_intermediate_node():
     app.model = model
 
     dp = DataPacket(user=MagicMock(), application=app)
-    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
     dp.size = 5
 
     flow = MagicMock(spec=NetworkFlow)
@@ -145,12 +124,12 @@ def test_add_link_hop_intermediate_node():
     flow.start = 0
     flow.end = 3
 
-    flow.queue_delay = 3
+    flow._queue_delay = 3
 
     flow.path = [2, 3]
     flow.topology = {2: {3: {"delay": 8}}}
 
-    flow.bandwidth_history = [10, 20, 30]
+    flow._bandwidth_history = [10, 20, 30]
 
     link_hop = LinkHop(
         hop_index=0,
@@ -186,7 +165,7 @@ def test_add_link_hop_complete():
     app.services = [service]
 
     dp = DataPacket(user=MagicMock(), application=app)
-    dp.total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
     dp.size = 5
 
     flow = MagicMock(spec=NetworkFlow)
@@ -200,12 +179,12 @@ def test_add_link_hop_complete():
     flow.start = 0
     flow.end = 3
 
-    flow.queue_delay = 3
+    flow._queue_delay = 3
 
     flow.path = [3, 4]
     flow.topology = {3: {4: {"delay": 8}}}
 
-    flow.bandwidth_history = [10, 20, 30]
+    flow._bandwidth_history = [10, 20, 30]
 
     server = MagicMock(spec=EdgeServer)
     switch = MagicMock(spec=NetworkSwitch)
