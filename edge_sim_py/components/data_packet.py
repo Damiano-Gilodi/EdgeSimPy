@@ -168,10 +168,10 @@ class DataPacket(ComponentManager, Agent):
             return
 
         # In last node hop
-        if hop + 1 < len(self._total_path):
+        if hop < len(self._total_path):
 
             service: "Service" = self.application.services[hop]
-            switch_id = self._total_path[hop + 1][0]
+            switch_id = self._total_path[hop][link + 1]
 
             switch = NetworkSwitch.find_by_id(switch_id)
             servers = switch.edge_servers
