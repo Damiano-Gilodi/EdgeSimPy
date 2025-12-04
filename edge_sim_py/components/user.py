@@ -17,6 +17,7 @@ import random
 
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
+    from edge_sim_py.components.data_packet import DataPacket
 
 
 class User(ComponentManager, Agent):
@@ -69,7 +70,7 @@ class User(ComponentManager, Agent):
 
         # Size strategy to generate data packets.
         # Possible mode values: "fixed" or "random"
-        self.packet_size_strategy = {
+        self.packet_size_strategy: dict = {
             "mode": "",
             "size": 0,
             "min": 0,
@@ -346,5 +347,15 @@ class User(ComponentManager, Agent):
             "max": max,
         }
 
-    def _generate_datapacket(self, app: "Application"):
-        return
+    def _generate_datapacket(self, app: "Application") -> "DataPacket":
+
+        size = 0
+        mode = self.packet_size_strategy["mode"]
+
+        if mode == "fixed":
+            size = self.packet_size_strategy["size"]
+        elif mode == "random":
+            size = random.randint(self.packet_size_strategy["min"], self.packet_size_strategy["max"])
+
+        dp = app.register_data_packet(user=self, size=size)
+        return dp
