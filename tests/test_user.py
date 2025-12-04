@@ -17,7 +17,7 @@ def test_user_start_flow():
         user._start_flow(app, current_step=0)
 
         assert mock_dp.total_path == [1, 2]
-        mock_dp.launch_next_flow.assert_called_once_with(start_step=0)
+        mock_dp._launch_next_flow.assert_called_once_with(start_step=0)
 
 
 def test_set_packet_size_strategy():

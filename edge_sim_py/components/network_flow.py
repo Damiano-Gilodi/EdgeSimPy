@@ -198,6 +198,6 @@ class NetworkFlow(ComponentManager, Agent):
                 # When data packet flows finish: start the next flow
                 elif self.metadata["type"] == "data_packet":
                     data_packet = self.metadata["object"]
-                    data_packet.on_flow_finished(self)
+                    data_packet._on_flow_finished(self)
 
                 self.model.schedule.remove(self)

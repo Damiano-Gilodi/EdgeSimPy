@@ -14,7 +14,7 @@ def test_start_processing():
     dp.processing_remaining_time = 0
     dp.size = 0
 
-    service.start_processing(dp)
+    service._start_processing(dp)
 
     assert dp.is_processing is True
     assert dp.processing_remaining_time == service.processing_time
@@ -44,4 +44,4 @@ def test_step_processing():
     assert dp.processing_remaining_time == 0
     assert dp.is_processing is False
     assert service.processing_queue == []
-    dp.launch_next_flow.assert_called_once_with(start_step=4)
+    dp._launch_next_flow.assert_called_once_with(start_step=4)

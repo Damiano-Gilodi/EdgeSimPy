@@ -154,8 +154,10 @@ class Service(ComponentManager, Agent):
 
     def step(self):
         """Method that executes the events involving the object at each time step."""
+        # Processing
         self._step_processing_data_packets()
 
+        # Checking if the service is being migrated
         if len(self._Service__migrations) > 0 and self._Service__migrations[-1]["end"] == None:
             migration = self._Service__migrations[-1]
 
@@ -327,7 +329,7 @@ class Service(ComponentManager, Agent):
             }
         )
 
-    def start_processing(self, data_packet: "DataPacket"):
+    def _start_processing(self, data_packet: "DataPacket"):
         """Starts processing a data packet.
 
         Args:
@@ -345,5 +347,5 @@ class Service(ComponentManager, Agent):
             data_packet.processing_remaining_time -= 1
             if data_packet.processing_remaining_time <= 0:
                 data_packet.is_processing = False
-                data_packet.launch_next_flow(start_step=self.model.schedule.steps + 1)
+                data_packet._launch_next_flow(start_step=self.model.schedule.steps + 1)
                 self.processing_queue.remove(data_packet)

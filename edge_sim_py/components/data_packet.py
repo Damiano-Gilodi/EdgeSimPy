@@ -125,7 +125,7 @@ class DataPacket(ComponentManager, Agent):
     def getHops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
 
-    def launch_next_flow(self, start_step):
+    def _launch_next_flow(self, start_step):
         """Method that lauches the next flow.
 
         Args:
@@ -146,7 +146,12 @@ class DataPacket(ComponentManager, Agent):
 
         self.application.model.initialize_agent(flow)
 
-    def on_flow_finished(self, flow: NetworkFlow):
+    def _on_flow_finished(self, flow: NetworkFlow):
+        """Method that executes when a data packet flow finishes.
+
+        Args:
+            flow (NetworkFlow): Finished flow.
+        """
 
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
@@ -154,17 +159,17 @@ class DataPacket(ComponentManager, Agent):
         # In intermediate node
         if link + 1 < len(self.total_path[hop]) - 1:
 
-            self.add_link_hop(flow)
+            self._add_link_hop(flow)
 
             self.current_hop = hop
             self.current_link = link + 1
-            self.launch_next_flow(start_step=flow.end)
+            self._launch_next_flow(start_step=flow.end)
             return
 
         # In last node hop
         if hop + 1 < len(self.total_path):
 
-            service = self.application.services[hop]
+            service: "Service" = self.application.services[hop]
             switch_id = self.total_path[hop + 1][0]
 
             switch = NetworkSwitch.find_by_id(switch_id)
@@ -173,14 +178,20 @@ class DataPacket(ComponentManager, Agent):
             for server in servers:
                 if server == service.server:
 
-                    self.add_link_hop(flow, service=service)
+                    self._add_link_hop(flow, service=service)
 
-                    service.start_processing(data_packet=self)
+                    service._start_processing(data_packet=self)
 
             self.current_hop = hop + 1
             self.current_link = 0
 
-    def add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
+    def _add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
+        """Method that adds a link hop to the data packet.
+
+        Args:
+            flow (NetworkFlow): Network flow.
+            service (Service, optional): Service associated with the flow. Defaults to None.
+        """
 
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]

@@ -364,4 +364,4 @@ class User(ComponentManager, Agent):
         dp.total_path = copy.deepcopy(self.communication_paths[str(app.id)])
 
         # Starting the network flow to transfer the data packet
-        dp.launch_next_flow(start_step=current_step)
+        dp._launch_next_flow(start_step=current_step)

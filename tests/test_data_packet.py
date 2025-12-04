@@ -58,7 +58,7 @@ def test_launch_next_flow():
 
     with patch("edge_sim_py.components.data_packet.NetworkFlow") as mock_flow:
 
-        dp.launch_next_flow(start_step=4)
+        dp._launch_next_flow(start_step=4)
 
         mock_flow.assert_called_once_with(
             topology=dp.application.model.topology,
@@ -89,10 +89,10 @@ def test_on_flow_finished_intermediate_node():
 
     fake_link_hop = MagicMock()
 
-    with patch.object(dp, "launch_next_flow") as mock_launch:
-        with patch.object(dp, "add_link_hop", return_value=fake_link_hop):
+    with patch.object(dp, "_launch_next_flow") as mock_launch:
+        with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
 
-            dp.on_flow_finished(flow)
+            dp._on_flow_finished(flow)
 
             mock_launch.assert_called_once_with(start_step=3)
 
@@ -117,11 +117,11 @@ def test_on_flow_finished_hop_complete():
     fake_link_hop = MagicMock()
 
     with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
-        with patch.object(dp, "add_link_hop", return_value=fake_link_hop):
+        with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
 
-            dp.on_flow_finished(flow)
+            dp._on_flow_finished(flow)
 
-            service.start_processing.assert_called_once_with(data_packet=dp)
+            service._start_processing.assert_called_once_with(data_packet=dp)
 
 
 def test_add_link_hop_intermediate_node():
@@ -170,7 +170,7 @@ def test_add_link_hop_intermediate_node():
         data_output=5,
     )
 
-    dp.on_flow_finished(flow)
+    dp._on_flow_finished(flow)
 
     assert dp.getHops() == [link_hop]
 
@@ -232,6 +232,6 @@ def test_add_link_hop_complete():
             data_output=10,
         )
 
-        dp.on_flow_finished(flow)
+        dp._on_flow_finished(flow)
 
         assert dp.getHops() == [link_hop]

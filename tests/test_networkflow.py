@@ -23,6 +23,6 @@ def test_step_flow_data_packet():
 
     flow.step()
 
-    dp.on_flow_finished.assert_called_once_with(flow)
+    dp._on_flow_finished.assert_called_once_with(flow)
 
     flow.model.schedule.remove.assert_called_once_with(flow)
