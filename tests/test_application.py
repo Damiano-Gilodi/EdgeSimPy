@@ -15,9 +15,8 @@ def test_register_data_packet():
 
     app.users = [u]
     u.applications = [app]
-    u.communication_paths = {"1": []}
 
-    dp = app.register_data_packet(user=u, size=20)
+    dp = app._register_datapacket(user=u, size=20)
 
     assert app._user_data_packets == {"1": [dp]}
 
@@ -105,21 +104,6 @@ def test_collect_with_data_packet():
     }
 
 
-def test_verify_set_path_register_data_packet():
-
-    app = Application(obj_id=1)
-    u = MagicMock(spec=User)
-    u.id = 1
-
-    app.users = [u]
-    u.applications = [app]
-    u.communication_paths = {"1": [[1, 2, 3], [2, 4]]}
-
-    dp = app.register_data_packet(user=u, size=20)
-
-    assert dp.total_path == [[1, 2, 3], [2, 4]]
-
-
 def test_connection_between_application_users():
 
     app = Application(obj_id=1)
@@ -128,18 +112,4 @@ def test_connection_between_application_users():
     u.communication_paths = {"1": []}
 
     with pytest.raises(ValueError, match="Connection between application users is not allowed."):
-        app.register_data_packet(user=u, size=20)
-
-
-def test_communication_path_not_specified():
-
-    app = Application(obj_id=1)
-    u = MagicMock(spec=User)
-    u.id = 1
-
-    app.users = [u]
-    u.applications = [app]
-    u.communication_paths = {}
-
-    with pytest.raises(ValueError, match="Communication path is not specified"):
-        app.register_data_packet(user=u, size=20)
+        app._register_datapacket(user=u, size=20)

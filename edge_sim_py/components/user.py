@@ -312,20 +312,6 @@ class User(ComponentManager, Agent):
         self.base_station = base_station
         base_station.users.append(self)
 
-    def _start_flow(self, app: "Application", current_step: int):
-        """Starts a network flow to transfer a data packet from the user to its application.
-
-        Args:
-            app (Application): Application accessed by the user.
-        """
-        # Generating data packet requested by the user
-        if str(app.id) not in self.communication_paths:
-            self.set_communication_path(app=app)
-        dp = self._generate_datapacket(app=app)
-
-        # Starting the network flow to transfer the data packet
-        dp.launch_next_flow(start_step=current_step)
-
     def set_packet_size_strategy(self, mode: str, size: int = 0, min: int = 0, max: int = 0):
         """Sets the packet size strategy for the user.
 
@@ -360,5 +346,22 @@ class User(ComponentManager, Agent):
         elif mode == "random":
             size = random.randint(self.packet_size_strategy["min"], self.packet_size_strategy["max"])
 
-        dp = app.register_data_packet(user=self, size=size)
+        dp = app._register_datapacket(user=self, size=size)
         return dp
+
+    def _start_flow(self, app: "Application", current_step: int):
+        """Starts a network flow to transfer a data packet from the user to its application.
+
+        Args:
+            app (Application): Application accessed by the user.
+        """
+        # Generating data packet requested by the user
+        dp = self._generate_datapacket(app=app)
+
+        # Defining communication path
+        if str(app.id) not in self.communication_paths:
+            self.set_communication_path(app=app)
+        dp.total_path = copy.deepcopy(self.communication_paths[str(app.id)])
+
+        # Starting the network flow to transfer the data packet
+        dp.launch_next_flow(start_step=current_step)
