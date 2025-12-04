@@ -106,7 +106,19 @@ class DataPacket(ComponentManager, Agent):
 
     def get_metrics(self) -> dict:
 
-        return {}
+        return {
+            "Id": self.id,
+            "User": self.user.id,
+            "Application": self.application.id,
+            "Size": self.size,
+            "Queue Delay": self._queue_delay_total,
+            "Transmission Delay": self._transmission_delay_total,
+            "Processing Delay": self._processing_delay_total,
+            "Propagation Delay": self._propagation_delay_total,
+            "Total Delay": self._total_delay,
+            "Total Path": self._total_path,
+            "Hops": [asdict(hop) for hop in self._link_hops],
+        }
 
     def get_hops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
