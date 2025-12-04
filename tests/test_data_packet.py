@@ -104,6 +104,18 @@ def test_on_flow_finished_hop_complete():
             service._start_processing.assert_called_once_with(data_packet=dp)
 
 
+def test_on_flow_finished_validation_link():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 0, "index_link": 3}  # valid link= 0:(1-2), 1:(2-3), 2:(3-4)
+
+    with pytest.raises(IndexError, match="Index link out of range."):
+        dp._on_flow_finished(flow)
+
+
 def test_add_link_hop_intermediate_node():
 
     app = MagicMock(spec=Application)
