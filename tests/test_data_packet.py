@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -151,7 +152,7 @@ def test_add_link_hop_intermediate_node():
 
     dp._on_flow_finished(flow)
 
-    assert dp.getHops() == [link_hop]
+    assert dp.get_hops() == [link_hop]
 
 
 def test_add_link_hop_complete():
@@ -213,4 +214,44 @@ def test_add_link_hop_complete():
 
         dp._on_flow_finished(flow)
 
-        assert dp.getHops() == [link_hop]
+        assert dp.get_hops() == [link_hop]
+
+
+def test_get_metrics():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    link_hop = LinkHop(
+        hop_index=0,
+        link_index=2,
+        source=3,
+        target=4,
+        start_time=0,
+        end_time=3,
+        queue_delay=3,
+        transmission_delay=3,
+        processing_delay=4,
+        propagation_delay=8,
+        min_bandwidth=10,
+        max_bandwidth=30,
+        avg_bandwidth=20,
+        data_input=5,
+        data_output=10,
+    )
+    dp._link_hops = [link_hop]
+
+    expected_metrics = {
+        "Id": dp.id,
+        "User": dp.user.id,
+        "Application": dp.application.id,
+        "Size": dp.size,
+        "Queue Delay": dp._queue_delay_total,
+        "Transmission Delay": dp._transmission_delay_total,
+        "Processing Delay": dp._processing_delay_total,
+        "Propagation Delay": dp._propagation_delay_total,
+        "Total Delay": dp._total_delay,
+        "Total Path": dp._total_path,
+        "Hops": [asdict(link_hop)],
+    }
+
+    assert dp.get_metrics() == expected_metrics

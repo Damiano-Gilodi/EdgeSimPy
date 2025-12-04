@@ -2,7 +2,7 @@
 
 # EdgeSimPy components
 import copy
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow
@@ -102,9 +102,13 @@ class DataPacket(ComponentManager, Agent):
         self._processing_remaining_time = 0
 
         # Hops
-        self._link_hops: list = []
+        self._link_hops: list[LinkHop] = []
 
-    def getHops(self) -> list[LinkHop]:
+    def get_metrics(self) -> dict:
+
+        return {}
+
+    def get_hops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
 
     def _launch_next_flow(self, start_step):
