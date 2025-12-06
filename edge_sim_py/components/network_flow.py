@@ -53,17 +53,7 @@ class NetworkFlow(ComponentManager, Agent):
         self.id = obj_id
 
         # Reference to the network topology object
-        # topology = {
-        #   1: {
-        #       2: {"id": 1, "delay": 10, "active_flows": [...]},
-        #       3: {"id": 3, "delay": 10, "active_flows": [...]}
-        #   },
-        #   2: {
-        #       3: {"id": 6, "delay": 10, "active_flows": [...]}
-        #   }
-        # }
-        # topology[1][2]["delay"] = 10
-        self.topology: dict[int, dict[int, dict[str, Any]]] = topology
+        self.topology = topology
 
         # Flow status. Valid options: "active" (default) and "finished"
         self.status = status

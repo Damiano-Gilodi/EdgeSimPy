@@ -31,7 +31,9 @@ def test_launch_next_flow():
     app.model = model
 
     dp = DataPacket(user=MagicMock(), application=app)
-    dp._total_path = [[1, 2, 3], [4, 5, 6]]
+    switch1 = MagicMock(spec=NetworkSwitch)
+    switch2 = MagicMock(spec=NetworkSwitch)
+    dp._total_path = [[MagicMock(), switch1, switch2, MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
     dp.size = 50
     dp._current_hop = 0
     dp._current_link = 1
@@ -42,9 +44,9 @@ def test_launch_next_flow():
 
         mock_flow.assert_called_once_with(
             topology=dp.application.model.topology,
-            source=2,
-            target=3,
-            path=[2, 3],
+            source=switch1,
+            target=switch2,
+            path=[switch1, switch2],
             start=4,
             data_to_transfer=50,
             metadata={
@@ -61,7 +63,7 @@ def test_launch_next_flow():
 def test_on_flow_finished_intermediate_node():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
 
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 1}
@@ -80,9 +82,9 @@ def test_on_flow_finished_intermediate_node():
 def test_on_flow_finished_hop_complete():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
-
     switch = MagicMock(spec=NetworkSwitch)
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), switch], [MagicMock(), MagicMock(), MagicMock()]]
+
     server = MagicMock(spec=EdgeServer)
     switch.edge_servers = [server]
 
@@ -94,20 +96,17 @@ def test_on_flow_finished_hop_complete():
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 2}
 
-    fake_link_hop = MagicMock()
+    with patch.object(dp, "_add_link_hop", return_value=MagicMock()):
 
-    with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
-        with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
+        dp._on_flow_finished(flow)
 
-            dp._on_flow_finished(flow)
-
-            service._start_processing.assert_called_once_with(data_packet=dp)
+        service._start_processing.assert_called_once_with(data_packet=dp)
 
 
 def test_on_flow_finished_validation_link():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
 
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 3}  # valid link= 0:(1-2), 1:(2-3), 2:(3-4)
@@ -119,12 +118,11 @@ def test_on_flow_finished_validation_link():
 def test_on_flow_finished_last_link_hop():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
-
     switch = MagicMock(spec=NetworkSwitch)
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), switch]]
+
     server = MagicMock(spec=EdgeServer)
     switch.edge_servers = [server]
-    switch.id = 6
 
     service = MagicMock(spec=Service)
     service.server = server
@@ -134,16 +132,11 @@ def test_on_flow_finished_last_link_hop():
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 1, "index_link": 1}
 
-    fake_link_hop = MagicMock()
+    with patch.object(dp, "_add_link_hop", return_value=MagicMock()):
 
-    with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id") as mock_find:
-        mock_find.return_value = switch
-        with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
+        dp._on_flow_finished(flow)
 
-            dp._on_flow_finished(flow)
-
-            mock_find.assert_called_once_with(6)
-            service._start_processing.assert_called_once_with(data_packet=dp)
+        service._start_processing.assert_called_once_with(data_packet=dp)
 
 
 def test_add_link_hop_intermediate_node():
@@ -153,32 +146,34 @@ def test_add_link_hop_intermediate_node():
     app.model = model
 
     dp = DataPacket(user=MagicMock(), application=app)
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    switch1 = MagicMock(spec=NetworkSwitch)
+    switch1.id = 1
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 2
+    dp._total_path = [[MagicMock(), switch1, switch2, MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
     dp.size = 5
 
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 1}
 
-    flow.source = MagicMock(spec=NetworkSwitch)
-    flow.target = MagicMock(spec=NetworkSwitch)
-    flow.source.id = 2
-    flow.target.id = 3
+    flow.source = switch1
+    flow.target = switch2
 
     flow.start = 0
     flow.end = 3
 
     flow._queue_delay = 3
 
-    flow.path = [2, 3]
-    flow.topology = {2: {3: {"delay": 8}}}
+    flow.path = [switch1, switch2]
+    flow.topology = {switch1: {switch2: {"delay": 8}}}
 
     flow._bandwidth_history = [10, 20, 30]
 
     link_hop = LinkHop(
         hop_index=0,
         link_index=1,
-        source=2,
-        target=3,
+        source=1,
+        target=2,
         start_time=0,
         end_time=3,
         queue_delay=3,
@@ -208,61 +203,64 @@ def test_add_link_hop_complete():
     app.services = [service]
 
     dp = DataPacket(user=MagicMock(), application=app)
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    switch1 = MagicMock(spec=NetworkSwitch)
+    switch1.id = 1
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 2
+    dp._total_path = [[MagicMock(), MagicMock(), switch1, switch2], [MagicMock(), MagicMock(), MagicMock()]]
     dp.size = 5
 
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 2}
 
-    flow.source = MagicMock(spec=NetworkSwitch)
-    flow.target = MagicMock(spec=NetworkSwitch)
-    flow.source.id = 3
-    flow.target.id = 4
+    flow.source = switch1
+    flow.target = switch2
 
     flow.start = 0
     flow.end = 3
 
     flow._queue_delay = 3
 
-    flow.path = [3, 4]
-    flow.topology = {3: {4: {"delay": 8}}}
+    flow.path = [switch1, switch2]
+    flow.topology = {switch1: {switch2: {"delay": 8}}}
 
     flow._bandwidth_history = [10, 20, 30]
 
     server = MagicMock(spec=EdgeServer)
-    switch = MagicMock(spec=NetworkSwitch)
-    switch.edge_servers = [server]
+    switch2.edge_servers = [server]
     service.server = server
 
-    with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
+    link_hop = LinkHop(
+        hop_index=0,
+        link_index=2,
+        source=1,
+        target=2,
+        start_time=0,
+        end_time=3,
+        queue_delay=3,
+        transmission_delay=3,
+        processing_delay=4,
+        propagation_delay=8,
+        min_bandwidth=10,
+        max_bandwidth=30,
+        avg_bandwidth=20,
+        data_input=5,
+        data_output=10,
+    )
 
-        link_hop = LinkHop(
-            hop_index=0,
-            link_index=2,
-            source=3,
-            target=4,
-            start_time=0,
-            end_time=3,
-            queue_delay=3,
-            transmission_delay=3,
-            processing_delay=4,
-            propagation_delay=8,
-            min_bandwidth=10,
-            max_bandwidth=30,
-            avg_bandwidth=20,
-            data_input=5,
-            data_output=10,
-        )
+    dp._on_flow_finished(flow)
 
-        dp._on_flow_finished(flow)
-
-        assert dp.get_hops() == [link_hop]
+    assert dp.get_hops() == [link_hop]
 
 
 def test_get_metrics():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
-    dp._total_path = [[1, 2, 3, 4], [4, 5, 6]]
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 3
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 4
+    dp._total_path = [[switch, switch2, switch, switch2], [switch2, switch2, switch2]]
     link_hop = LinkHop(
         hop_index=0,
         link_index=2,
@@ -292,7 +290,7 @@ def test_get_metrics():
         "Processing Delay": dp._processing_delay_total,
         "Propagation Delay": dp._propagation_delay_total,
         "Total Delay": dp._total_delay,
-        "Total Path": dp._total_path,
+        "Total Path": [[3, 4, 3, 4], [4, 4, 4]],
         "Hops": [asdict(link_hop)],
     }
 

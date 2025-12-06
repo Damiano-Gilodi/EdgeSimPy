@@ -88,6 +88,7 @@ class Application(ComponentManager, Agent):
             for dp in packets:
 
                 hops_serialized = [asdict(hop) for hop in dp._link_hops]
+                total_path = [[network_switch.id for network_switch in hop] for hop in dp._total_path]
 
                 dp_metrics = {
                     "Id": dp.id,
@@ -97,7 +98,7 @@ class Application(ComponentManager, Agent):
                     "Processing Delay": dp._processing_delay_total,
                     "Propagation Delay": dp._propagation_delay_total,
                     "Total Delay": dp._total_delay,
-                    "Total Path": dp.total_path,
+                    "Total Path": total_path,
                     "Hops": hops_serialized,
                 }
                 user_metrics.append(dp_metrics)

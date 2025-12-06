@@ -91,7 +91,7 @@ class DataPacket(ComponentManager, Agent):
         self._total_delay = 0
 
         # Total path (list of hop nodes between services)
-        self._total_path: list[list[int]] = []
+        self._total_path: list[list[NetworkSwitch]] = []
 
         # Hops
         self._current_hop = 0
@@ -105,6 +105,13 @@ class DataPacket(ComponentManager, Agent):
         self._link_hops: list[LinkHop] = []
 
     def get_metrics(self) -> dict:
+        """Method that collects a set of metrics for the object.
+
+        Returns:
+            metrics (dict): Object metrics.
+        """
+
+        total_path = [[network_switch.id for network_switch in hop] for hop in self._total_path]
 
         return {
             "Id": self.id,
@@ -116,7 +123,7 @@ class DataPacket(ComponentManager, Agent):
             "Processing Delay": self._processing_delay_total,
             "Propagation Delay": self._propagation_delay_total,
             "Total Delay": self._total_delay,
-            "Total Path": self._total_path,
+            "Total Path": total_path,
             "Hops": [asdict(hop) for hop in self._link_hops],
         }
 
@@ -171,9 +178,8 @@ class DataPacket(ComponentManager, Agent):
         if hop < len(self._total_path):
 
             service: "Service" = self.application.services[hop]
-            switch_id = self._total_path[hop][link + 1]
+            switch = self._total_path[hop][link + 1]
 
-            switch = NetworkSwitch.find_by_id(switch_id)
             servers = switch.edge_servers
 
             for server in servers:

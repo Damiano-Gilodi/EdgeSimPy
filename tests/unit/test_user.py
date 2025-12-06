@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket
+from edge_sim_py.components.network_switch import NetworkSwitch
 from edge_sim_py.components.user import User
 
 
@@ -10,14 +11,16 @@ def test_user_start_flow():
     app = MagicMock(spec=Application)
     app.id = 1
     mock_dp = MagicMock(spec=DataPacket)
-    user.communication_paths = {"1": [1, 2]}
+    user.communication_paths = {"1": [[1, 2]]}
 
+    switch = MagicMock(spec=NetworkSwitch)
     with patch.object(user, "_generate_datapacket", return_value=mock_dp):
+        with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
 
-        user._start_flow(app, current_step=0)
+            user._start_flow(app, current_step=0)
 
-        assert mock_dp._total_path == [1, 2]
-        mock_dp._launch_next_flow.assert_called_once_with(start_step=0)
+            assert mock_dp._total_path == [[switch, switch]]
+            mock_dp._launch_next_flow.assert_called_once_with(start_step=0)
 
 
 def test_set_packet_size_strategy():

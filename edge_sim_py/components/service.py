@@ -113,6 +113,8 @@ class Service(ComponentManager, Agent):
                 "cpu_demand": self.cpu_demand,
                 "memory_demand": self.memory_demand,
                 "image_digest": self.image_digest,
+                "processing_time": self.processing_time,
+                "processing_output": self.processing_output,
             },
             "relationships": {
                 "application": {"class": type(self.application).__name__, "id": self.application.id},
@@ -148,6 +150,8 @@ class Service(ComponentManager, Agent):
             "Available": self._available,
             "Server": self.server.id if self.server else None,
             "Being Provisioned": self.being_provisioned,
+            "Processing Time": self.processing_time,
+            "Processing Output": self.processing_output,
             "Last Migration": last_migration,
         }
         return metrics

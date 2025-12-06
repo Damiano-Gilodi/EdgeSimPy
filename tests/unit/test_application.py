@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import pytest
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.data_packet import DataPacket, LinkHop
+from edge_sim_py.components.network_switch import NetworkSwitch
 from edge_sim_py.components.service import Service
 from edge_sim_py.components.user import User
 
@@ -58,7 +59,11 @@ def test_collect_with_data_packet():
     data_packet._processing_delay_total = 4
     data_packet._propagation_delay_total = 8
     data_packet._total_delay = 18
-    data_packet.total_path = [[1, 2, 3], [2, 4]]
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 3
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 4
+    data_packet._total_path = [[switch, switch2], [switch2, switch]]
     data_packet._link_hops = [link_hop]
 
     app._user_data_packets = {"1": [data_packet]}
@@ -78,7 +83,7 @@ def test_collect_with_data_packet():
                     "Processing Delay": 4,
                     "Propagation Delay": 8,
                     "Total Delay": 18,
-                    "Total Path": [[1, 2, 3], [2, 4]],
+                    "Total Path": [[3, 4], [4, 3]],
                     "Hops": [
                         {
                             "hop_index": 0,

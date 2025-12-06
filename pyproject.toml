@@ -11,7 +11,7 @@ requires-python = ">=3.10"
 dependencies = [
     "Mesa>=1.0.0,<2.0.0",
     "networkx==3.4.2",
-    "msgpack>=1.0.4,<2.0.0"
+    "msgpack>=1.0.4,<2.0.0",
 ]
 
 [dependency-groups]
@@ -24,7 +24,8 @@ dev = [
     "ruff>=0.14.5,<1.0.0",
     "pytest>=9.0.1,<10.0.0",
     "pytest-cov>=7.0.0,<8.0.0",
-    "mypy>=1.18.2,<2.0.0"
+    "mypy>=1.18.2,<2.0.0",
+    "matplotlib (>=3.10.7,<4.0.0)"
 ]
 
 [build-system]
