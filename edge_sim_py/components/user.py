@@ -145,6 +145,7 @@ class User(ComponentManager, Agent):
             # services are available.
             if self.making_requests[str(app.id)][str(current_step)]:
                 if len([s for s in app.services if s._available]) == len(app.services):
+                    self._start_flow(app=app, current_step=current_step)
                     last_access["access_time"] += 1
                 else:
                     last_access["waiting_time"] += 1
