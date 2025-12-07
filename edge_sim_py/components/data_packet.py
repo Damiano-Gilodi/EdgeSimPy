@@ -225,12 +225,12 @@ class DataPacket(ComponentManager, Agent):
 
     @property
     def processing_delay_total(self):
-        return
+        return sum(h.processing_delay for h in self._link_hops)
 
     @property
     def propagation_delay_total(self):
-        return
+        return sum(h.propagation_delay for h in self._link_hops)
 
     @property
     def total_delay(self):
-        return
+        return sum(h.queue_delay + h.transmission_delay + h.processing_delay + h.propagation_delay for h in self._link_hops)
