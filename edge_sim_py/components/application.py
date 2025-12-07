@@ -93,11 +93,11 @@ class Application(ComponentManager, Agent):
                 dp_metrics = {
                     "Id": dp.id,
                     "User": dp.user.id,
-                    "Queue Delay": dp._queue_delay_total,
-                    "Transmission Delay": dp._transmission_delay_total,
-                    "Processing Delay": dp._processing_delay_total,
-                    "Propagation Delay": dp._propagation_delay_total,
-                    "Total Delay": dp._total_delay,
+                    "Queue Delay": dp.queue_delay_total,
+                    "Transmission Delay": dp.transmission_delay_total,
+                    "Processing Delay": dp.processing_delay_total,
+                    "Propagation Delay": dp.propagation_delay_total,
+                    "Total Delay": dp.total_delay,
                     "Total Path": total_path,
                     "Hops": hops_serialized,
                 }

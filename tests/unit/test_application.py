@@ -54,11 +54,11 @@ def test_collect_with_data_packet():
 
     data_packet.id = 3
     data_packet.user = u
-    data_packet._queue_delay_total = 3
-    data_packet._transmission_delay_total = 3
-    data_packet._processing_delay_total = 4
-    data_packet._propagation_delay_total = 8
-    data_packet._total_delay = 18
+    data_packet.queue_delay_total = 3
+    data_packet.transmission_delay_total = 3
+    data_packet.processing_delay_total = 4
+    data_packet.propagation_delay_total = 8
+    data_packet.total_delay = 18
     switch = MagicMock(spec=NetworkSwitch)
     switch.id = 3
     switch2 = MagicMock(spec=NetworkSwitch)

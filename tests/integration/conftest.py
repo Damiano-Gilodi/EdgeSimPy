@@ -4,6 +4,7 @@ from edge_sim_py.components.application import Application
 from edge_sim_py.components.base_station import BaseStation
 from edge_sim_py.components.data_packet import DataPacket
 from edge_sim_py.components.edge_server import EdgeServer
+from edge_sim_py.components.flow_scheduling import max_min_fairness
 from edge_sim_py.components.network_flow import NetworkFlow
 from edge_sim_py.components.network_link import NetworkLink
 from edge_sim_py.components.network_switch import NetworkSwitch
@@ -27,16 +28,20 @@ def reset_components():
 class DummySchedule:
     def __init__(self):
         self.steps = 0
+        self.agents = []
+
+    def remove(self, agent):
+        self.agents.remove(agent)
 
 
 class DummyModel:
     def __init__(self):
         self.schedule = DummySchedule()
         self.topology = None
-        self.agents = []
+        self.network_flow_scheduling_algorithm = max_min_fairness
 
     def initialize_agent(self, agent):
-        self.agents.append(agent)
+        self.schedule.agents.append(agent)
         agent.model = self
 
 
@@ -71,25 +76,30 @@ def basic_topology():
         ],
     )
 
-    # Creating the Edge Server
-    servers = _servers_base_station(number_of_servers=4)
-
     return {
         "base_stations": BaseStation.all(),
         "network_switches": NetworkSwitch.all(),
-        "edge_servers": servers,
         "topology": topology,
     }
 
 
 @pytest.fixture
 def small_app_1_user_4_services(basic_topology):
+    """A small app with 1 user and 4 services
+
+    data packet size = 20
+    server n:4, processing time = 5+n, processing output = 10+n
+    requests start = 1, duration = 1, interval = 1
+    user position = (0,0) no mobility
+    """
+    # Creating the Edge Server
+    servers = _servers_base_station(number_of_servers=4)
 
     # Creating the services
     services = _services_processing(number_of_services=4)
 
     # Assigning the services to the edge servers
-    for server, service in zip(basic_topology["edge_servers"], services):
+    for server, service in zip(servers, services):
         server.services.append(service)
         service.server = server
         service._available = True
@@ -113,6 +123,7 @@ def small_app_1_user_4_services(basic_topology):
     dummy_model = DummyModel()
     dummy_model.topology = basic_topology["topology"]
 
+    basic_topology["topology"].model = dummy_model
     user.model = dummy_model
     app.model = dummy_model
 
@@ -153,7 +164,7 @@ def _services_processing(number_of_services: int):
             memory_demand=1200,
             state=0,
             processing_time=5 + i,
-            processing_output=10 + i,
+            processing_output=21 + i,
         )
 
     return Service.all()

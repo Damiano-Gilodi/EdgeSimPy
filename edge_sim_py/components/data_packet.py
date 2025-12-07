@@ -82,14 +82,6 @@ class DataPacket(ComponentManager, Agent):
         # User
         self.user: "User" = user
 
-        # Delays
-        self._queue_delay_total = 0
-        self._transmission_delay_total = 0
-        self._processing_delay_total = 0
-        self._propagation_delay_total = 0
-
-        self._total_delay = 0
-
         # Total path (list of hop nodes between services)
         self._total_path: list[list[NetworkSwitch]] = []
 
@@ -118,11 +110,11 @@ class DataPacket(ComponentManager, Agent):
             "User": self.user.id,
             "Application": self.application.id,
             "Size": self.size,
-            "Queue Delay": self._queue_delay_total,
-            "Transmission Delay": self._transmission_delay_total,
-            "Processing Delay": self._processing_delay_total,
-            "Propagation Delay": self._propagation_delay_total,
-            "Total Delay": self._total_delay,
+            "Queue Delay": self.queue_delay_total,
+            "Transmission Delay": self.transmission_delay_total,
+            "Processing Delay": self.processing_delay_total,
+            "Propagation Delay": self.propagation_delay_total,
+            "Total Delay": self.total_delay,
             "Total Path": total_path,
             "Hops": [asdict(hop) for hop in self._link_hops],
         }
@@ -222,3 +214,23 @@ class DataPacket(ComponentManager, Agent):
         )
 
         self._link_hops.append(link_hop)
+
+    @property
+    def queue_delay_total(self):
+        return sum(h.queue_delay for h in self._link_hops)
+
+    @property
+    def transmission_delay_total(self):
+        return sum(h.transmission_delay for h in self._link_hops)
+
+    @property
+    def processing_delay_total(self):
+        return
+
+    @property
+    def propagation_delay_total(self):
+        return
+
+    @property
+    def total_delay(self):
+        return
