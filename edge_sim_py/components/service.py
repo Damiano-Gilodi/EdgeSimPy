@@ -94,6 +94,8 @@ class Service(ComponentManager, Agent):
         self.processing_output = processing_output
         self._processing_queue: list["DataPacket"] = []
 
+        self._output_queue: list["DataPacket"] = []
+
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
         self.unique_id = None
@@ -158,7 +160,13 @@ class Service(ComponentManager, Agent):
 
     def step(self):
         """Method that executes the events involving the object at each time step."""
-        # Processing
+        # Launching next flow after processing
+        for packet in self._output_queue:
+            if packet._current_hop < len(packet._total_path):
+                packet._launch_next_flow(start_step=packet._link_hops[-1].end_time + self.processing_time)
+            self._output_queue.remove(packet)
+
+        # Processing data packets
         self._step_processing_data_packets()
 
         # Checking if the service is being migrated
@@ -351,5 +359,5 @@ class Service(ComponentManager, Agent):
             data_packet._processing_remaining_time -= 1
             if data_packet._processing_remaining_time <= 0:
                 data_packet._is_processing = False
-                data_packet._launch_next_flow(start_step=self.model.schedule.steps + 1)
+                self._output_queue.append(data_packet)
                 self._processing_queue.remove(data_packet)
