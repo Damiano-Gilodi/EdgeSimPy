@@ -88,7 +88,7 @@ def small_app_1_user_4_services(basic_topology):
     """A small app with 1 user and 4 services
 
     data packet size = 20
-    server n:4, processing time = 5+n, processing output = 10+n
+    server n:4, processing time = 2+n, processing output = 10+n
     requests start = 1, duration = 1, interval = 1
     user position = (0,0) no mobility
     """
@@ -126,11 +126,14 @@ def small_app_1_user_4_services(basic_topology):
     basic_topology["topology"].model = dummy_model
     user.model = dummy_model
     app.model = dummy_model
+    for service in services:
+        service.model = dummy_model
 
     return {
         "user": user,
         "application": app,
         "services": services,
+        "model": dummy_model,
     }
 
 
@@ -163,7 +166,7 @@ def _services_processing(number_of_services: int):
             cpu_demand=1,
             memory_demand=1200,
             state=0,
-            processing_time=5 + i,
+            processing_time=2 + i,
             processing_output=21 + i,
         )
 
