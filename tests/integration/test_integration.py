@@ -104,7 +104,8 @@ def test_integration_complete_Networkflow_Processing(small_app_1_user_4_services
     app = small_app_1_user_4_services["application"]
     services = sorted(small_app_1_user_4_services["services"], key=lambda b: b.id)
 
-    for i in range(20):  # 10 requests true
+    total_links = 0
+    while True:  # for i in range(20):  # 10 requests true
 
         for agent in Service.all():
             agent.step()
@@ -120,8 +121,24 @@ def test_integration_complete_Networkflow_Processing(small_app_1_user_4_services
 
         model.schedule.steps += 1
 
-    assert len(NetworkFlow.all()) == 25
-    assert len(DataPacket.all()) == 10
+        total_links = sum(len(link_hop) - 1 for link_hop in DataPacket.all()[0]._total_path)
+        if len(DataPacket.all()) > 1:
+            if len(DataPacket.all()[1].get_hops()) == total_links:
+                break
+
+    total_datapackets = model.schedule.steps // 2 if model.schedule.steps % 2 == 0 else model.schedule.steps // 2 + 1
+    assert len(DataPacket.all()) == total_datapackets
+
+    assert len(DataPacket.all()[0].get_hops()) == total_links
+    assert len(DataPacket.all()[1].get_hops()) == total_links
+
+    assert DataPacket.all()[0].get_hops()[-1].target == 8
+    assert DataPacket.all()[1].get_hops()[-1].target == 8
+
+    assert DataPacket.all()[0].processing_delay_total == 14
+    assert DataPacket.all()[1].processing_delay_total == 14
+    assert DataPacket.all()[0].propagation_delay_total == 6
+    assert DataPacket.all()[1].propagation_delay_total == 6
 
     for datapacket in DataPacket.all():
 
@@ -130,6 +147,7 @@ def test_integration_complete_Networkflow_Processing(small_app_1_user_4_services
         for i, hop in enumerate(hops):
 
             total_delay += hop.transmission_delay + hop.queue_delay + hop.processing_delay + hop.propagation_delay
+
             assert hop.start_time + hop.transmission_delay + hop.queue_delay == hop.end_time
 
             if i < len(hops) - 1:
