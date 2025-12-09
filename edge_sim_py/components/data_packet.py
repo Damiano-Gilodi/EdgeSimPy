@@ -203,7 +203,7 @@ class DataPacket(ComponentManager, Agent):
             start_time=flow.start,
             end_time=flow.end,
             queue_delay=flow._queue_delay,
-            transmission_delay=flow.end - flow.start,
+            transmission_delay=(flow.end - flow.start) - flow._queue_delay,
             processing_delay=service.processing_time if service else 0,
             propagation_delay=flow.topology[flow.path[0]][flow.path[1]]["delay"],
             min_bandwidth=min(flow._bandwidth_history),
