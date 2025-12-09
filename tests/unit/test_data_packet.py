@@ -160,7 +160,7 @@ def test_add_link_hop_intermediate_node():
     flow.target = switch2
 
     flow.start = 0
-    flow.end = 3
+    flow.end = 4
 
     flow._queue_delay = 3
 
@@ -175,9 +175,9 @@ def test_add_link_hop_intermediate_node():
         source=1,
         target=2,
         start_time=0,
-        end_time=3,
+        end_time=4,
         queue_delay=3,
-        transmission_delay=3,
+        transmission_delay=1,
         processing_delay=0,
         propagation_delay=8,
         min_bandwidth=10,
@@ -217,7 +217,7 @@ def test_add_link_hop_complete():
     flow.target = switch2
 
     flow.start = 0
-    flow.end = 3
+    flow.end = 4
 
     flow._queue_delay = 3
 
@@ -236,9 +236,9 @@ def test_add_link_hop_complete():
         source=1,
         target=2,
         start_time=0,
-        end_time=3,
+        end_time=4,
         queue_delay=3,
-        transmission_delay=3,
+        transmission_delay=1,
         processing_delay=4,
         propagation_delay=8,
         min_bandwidth=10,
