@@ -145,6 +145,13 @@ class DataPacket(ComponentManager, Agent):
 
     def step(self):
 
+        if self._is_processing:
+            self._processing_remaining_time -= 1
+            if self._processing_remaining_time <= 0:
+                self._is_processing = False
+                self._launch_next_flow(start_step=self.model.schedule.steps)
+            return
+
         if self._current_hop < len(self._total_path):
             if self._current_flow is None:
                 self._launch_next_flow(start_step=self.model.schedule.steps)
