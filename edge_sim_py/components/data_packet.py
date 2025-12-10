@@ -168,7 +168,8 @@ class DataPacket(ComponentManager, Agent):
             metadata={"type": "data_packet", "object": self, "index_hop": hop, "index_link": link},
         )
 
-        self.application.model.initialize_agent(flow)
+        self._current_flow = flow
+        self.model.initialize_agent(flow)
 
     def _on_flow_finished(self, flow: NetworkFlow):
         """Method that executes when a data packet flow finishes.
