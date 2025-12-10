@@ -97,7 +97,7 @@ class DataPacket(ComponentManager, Agent):
         self._link_hops: list[LinkHop] = []
 
         # Current flow
-        self._current_flow: "NetworkFlow" = None
+        self._current_flow: "NetworkFlow | None" = None
 
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
@@ -191,7 +191,7 @@ class DataPacket(ComponentManager, Agent):
 
             self._current_hop = hop
             self._current_link = link + 1
-            self._launch_next_flow(start_step=flow.end)
+            self._current_flow = None
             return
 
         # In last node hop
@@ -211,6 +211,7 @@ class DataPacket(ComponentManager, Agent):
 
             self._current_hop = hop + 1
             self._current_link = 0
+            self._current_flow = None
 
     def _add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
         """Method that adds a link hop to the data packet.
