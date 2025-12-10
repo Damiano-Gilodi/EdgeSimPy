@@ -96,6 +96,9 @@ class DataPacket(ComponentManager, Agent):
         # Hops
         self._link_hops: list[LinkHop] = []
 
+        # Current flow
+        self._current_flow: "NetworkFlow" = None
+
         # Model-specific attributes (defined inside the model's "initialize()" method)
         self.model = None
         self.unique_id = None
@@ -139,6 +142,10 @@ class DataPacket(ComponentManager, Agent):
 
     def get_hops(self) -> list[LinkHop]:
         return copy.deepcopy(self._link_hops)
+
+    def step(self):
+
+        return
 
     def _launch_next_flow(self, start_step):
         """Method that lauches the next flow.

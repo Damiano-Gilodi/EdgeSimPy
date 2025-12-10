@@ -1,4 +1,5 @@
 from dataclasses import asdict
+from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -338,3 +339,21 @@ def test_to_dict():
     }
 
     assert dp._to_dict() == expected_metrics
+
+
+def test_step():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
+    dp._current_hop = 0
+    dp._current_flow = None
+
+    model = MagicMock()
+    model.schedule.steps = 4
+    dp.model = model
+
+    with patch.object(dp, "_launch_next_flow") as mock_launch:
+
+        dp.step()
+
+        mock_launch.assert_called_once_with(start_step=4)
