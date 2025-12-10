@@ -100,6 +100,9 @@ class DataPacket(ComponentManager, Agent):
         self.model = None
         self.unique_id = None
 
+    def _to_dict(self) -> dict:
+        return {}
+
     def collect(self) -> dict:
         """Method that collects a set of metrics for the object.
 

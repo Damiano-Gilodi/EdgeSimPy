@@ -295,3 +295,46 @@ def test_collect():
     }
 
     assert dp.collect() == expected_metrics
+
+
+def test_to_dict():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 3
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 4
+    dp._total_path = [[switch, switch2, switch, switch2], [switch2, switch2, switch2]]
+    link_hop = LinkHop(
+        hop_index=0,
+        link_index=2,
+        source=3,
+        target=4,
+        start_time=0,
+        end_time=3,
+        queue_delay=3,
+        transmission_delay=3,
+        processing_delay=4,
+        propagation_delay=8,
+        min_bandwidth=10,
+        max_bandwidth=30,
+        avg_bandwidth=20,
+        data_input=5,
+        data_output=10,
+    )
+    dp._link_hops = [link_hop]
+
+    expected_metrics = {
+        "id": dp.id,
+        "user": dp.user.id,
+        "application": dp.application.id,
+        "size": dp.size,
+        "current_hop": dp._current_hop,
+        "current_link": dp._current_link,
+        "is_processing": dp._is_processing,
+        "processing_remaining_time": dp._processing_remaining_time,
+        "total_path": [[sw.id for sw in hop] for hop in dp._total_path],
+        "hops": [asdict(h) for h in dp._link_hops],
+    }
+
+    assert dp._to_dict() == expected_metrics
