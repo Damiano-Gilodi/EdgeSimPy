@@ -348,10 +348,8 @@ class Service(ComponentManager, Agent):
             data_packet (DataPacket): Data packet to process.
         """
         data_packet._is_processing = True
-        data_packet._processing_remaining_time = self.processing_time
+        data_packet._processing_remaining_time = self.processing_time + 1
         data_packet.size = self.processing_output
-
-        self._processing_queue.append(data_packet)
 
     def _step_processing_data_packets(self):
         """Processes the data packets that are currently being processed by this service."""
