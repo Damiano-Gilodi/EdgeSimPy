@@ -1,7 +1,6 @@
 """Contains application-related functionality."""
 
 # EdgeSimPy components
-from dataclasses import asdict
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.data_packet import DataPacket
@@ -81,36 +80,12 @@ class Application(ComponentManager, Agent):
             metrics (dict): Object metrics.
         """
         """Collects metrics for the application and its datapackets in an optimized way."""
-        user_data_packets_metrics = {}
-
-        for user_id, packets in self._user_data_packets.items():
-            user_metrics = []
-            for dp in packets:
-
-                hops_serialized = [asdict(hop) for hop in dp._link_hops]
-                total_path = [[network_switch.id for network_switch in hop] for hop in dp._total_path]
-
-                dp_metrics = {
-                    "Id": dp.id,
-                    "User": dp.user.id,
-                    "Queue Delay": dp.queue_delay_total,
-                    "Transmission Delay": dp.transmission_delay_total,
-                    "Processing Delay": dp.processing_delay_total,
-                    "Propagation Delay": dp.propagation_delay_total,
-                    "Total Delay": dp.total_delay,
-                    "Total Path": total_path,
-                    "Hops": hops_serialized,
-                }
-                user_metrics.append(dp_metrics)
-
-            user_data_packets_metrics[user_id] = user_metrics
-
         metrics = {
             "Id": self.id,
             "Label": self.label,
             "Services": [service.id for service in self.services],
             "Users": [user.id for user in self.users],
-            "Data packets": user_data_packets_metrics,
+            "Data packets": {user_id: [dp.id for dp in dp_list] for user_id, dp_list in self._user_data_packets.items()},
         }
 
         return metrics
