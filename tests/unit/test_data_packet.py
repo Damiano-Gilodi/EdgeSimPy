@@ -1,5 +1,4 @@
 from dataclasses import asdict
-from unittest import mock
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -370,8 +369,10 @@ def test_step():
 def test_step_processing():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    dp.size = 10
     dp._is_processing = True
     dp._processing_remaining_time = 0
+    dp._processing_output = 5
 
     model = MagicMock()
     model.schedule.steps = 4
@@ -382,3 +383,5 @@ def test_step_processing():
         dp.step()
 
         mock_launch.assert_called_once_with(start_step=4)
+        assert dp._is_processing is False
+        assert dp.size == 5

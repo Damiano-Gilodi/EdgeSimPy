@@ -92,6 +92,7 @@ class DataPacket(ComponentManager, Agent):
         # Processing
         self._is_processing = False
         self._processing_remaining_time = 0
+        self._processing_output = 0
 
         # Hops
         self._link_hops: list[LinkHop] = []
@@ -144,14 +145,18 @@ class DataPacket(ComponentManager, Agent):
         return copy.deepcopy(self._link_hops)
 
     def step(self):
+        """Method that executes the events involving the object at each time step."""
 
+        # Processing
         if self._is_processing:
             self._processing_remaining_time -= 1
             if self._processing_remaining_time <= 0:
                 self._is_processing = False
+                self.size = self._processing_output
                 self._launch_next_flow(start_step=self.model.schedule.steps)
             return
 
+        # Launching the next flow
         if self._current_hop < len(self._total_path):
             if self._current_flow is None:
                 self._launch_next_flow(start_step=self.model.schedule.steps)

@@ -337,4 +337,4 @@ class Service(ComponentManager, Agent):
         """
         data_packet._is_processing = True
         data_packet._processing_remaining_time = self.processing_time + 1
-        data_packet.size = self.processing_output
+        data_packet._processing_output = self.processing_output

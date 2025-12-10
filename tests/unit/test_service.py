@@ -18,4 +18,4 @@ def test_start_processing():
 
     assert dp._is_processing is True
     assert dp._processing_remaining_time == service.processing_time + 1
-    assert dp.size == service.processing_output
+    assert dp._processing_output == service.processing_output
