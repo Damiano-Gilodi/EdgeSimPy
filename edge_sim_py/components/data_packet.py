@@ -145,7 +145,9 @@ class DataPacket(ComponentManager, Agent):
 
     def step(self):
 
-        return
+        if self._current_hop < len(self._total_path):
+            if self._current_flow is None:
+                self._launch_next_flow(start_step=self.model.schedule.steps)
 
     def _launch_next_flow(self, start_step):
         """Method that lauches the next flow.
