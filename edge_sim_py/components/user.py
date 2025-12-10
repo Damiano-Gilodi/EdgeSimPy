@@ -145,7 +145,7 @@ class User(ComponentManager, Agent):
             # services are available.
             if self.making_requests[str(app.id)][str(current_step)]:
                 if len([s for s in app.services if s._available]) == len(app.services):
-                    self._start_flow(app=app, current_step=current_step)
+                    self._start_flow(app=app)
                     last_access["access_time"] += 1
                 else:
                     last_access["waiting_time"] += 1
@@ -365,4 +365,4 @@ class User(ComponentManager, Agent):
         dp._total_path = [[NetworkSwitch.find_by_id(i) for i in p] for p in self.communication_paths[str(app.id)]]
 
         # Initializing DataPacket agent
-        self.model.inizialize_agent(dp)
+        self.model.initialize_agent(dp)

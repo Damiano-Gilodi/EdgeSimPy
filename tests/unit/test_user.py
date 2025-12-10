@@ -24,7 +24,7 @@ def test_user_start_flow():
 
             assert mock_dp._total_path == [[switch, switch]]
 
-            user.model.inizialize_agent.assert_called_once_with(mock_dp)
+            user.model.initialize_agent.assert_called_once_with(mock_dp)
 
 
 def test_set_packet_size_strategy():

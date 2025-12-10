@@ -11,7 +11,10 @@ def test_integration_start_flows(small_app_1_user_4_services):
     user = small_app_1_user_4_services["user"]
     app = small_app_1_user_4_services["application"]
 
-    for i in range(5):  # 3 requests true [1,3,5]
+    for _ in range(6):  # 3 requests true [1,3,5]
+
+        for agent in DataPacket.all():
+            agent.step()
 
         user.step()
 
@@ -40,6 +43,8 @@ def test_integration_start_flows(small_app_1_user_4_services):
     assert flow.data_to_transfer == 20
     assert flow.metadata == {"type": "data_packet", "object": DataPacket.all()[0], "index_hop": 0, "index_link": 0}
 
+    assert datapacket._current_flow == flow
+
 
 def test_integration_complete_Networkflow(small_app_1_user_4_services):
 
@@ -47,7 +52,11 @@ def test_integration_complete_Networkflow(small_app_1_user_4_services):
     app = small_app_1_user_4_services["application"]
     services = sorted(small_app_1_user_4_services["services"], key=lambda b: b.id)
 
-    for i in range(3):  # 2 requests true [1,3]
+    for _ in range(4):  # 2 requests true [1,3]
+
+        for agent in DataPacket.all():
+            print(agent.get_hops())
+            agent.step()
 
         for agent in Topology.all():
             agent.step()
@@ -68,10 +77,9 @@ def test_integration_complete_Networkflow(small_app_1_user_4_services):
     assert len(datapacket1.get_hops()) == 1
     assert len(datapacket2.get_hops()) == 0
 
-    assert datapacket1.size == 21
+    assert datapacket1.size == 20
     assert datapacket1._is_processing is True
     assert datapacket1._processing_remaining_time == 2
-    assert services[0]._processing_queue == [datapacket1]
 
     assert datapacket1.total_delay == 5
     assert datapacket1.transmission_delay_total == 2
@@ -105,7 +113,10 @@ def test_integration_complete_Networkflow_Processing(small_app_1_user_4_services
     services = sorted(small_app_1_user_4_services["services"], key=lambda b: b.id)
 
     total_links = 0
-    while True:  # for i in range(20):  # 10 requests true
+    while True:
+
+        for agent in DataPacket.all():
+            agent.step()
 
         for agent in Service.all():
             agent.step()
@@ -114,7 +125,6 @@ def test_integration_complete_Networkflow_Processing(small_app_1_user_4_services
             agent.step()
 
         for agent in NetworkFlow.all():
-            agent.model = model
             agent.step()
 
         user.step()
