@@ -364,5 +364,5 @@ class User(ComponentManager, Agent):
             self.set_communication_path(app=app)
         dp._total_path = [[NetworkSwitch.find_by_id(i) for i in p] for p in self.communication_paths[str(app.id)]]
 
-        # Starting the network flow to transfer the data packet
-        dp._launch_next_flow(start_step=current_step)
+        # Initializing DataPacket agent
+        self.model.inizialize_agent(dp)
