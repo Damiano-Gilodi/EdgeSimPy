@@ -350,7 +350,7 @@ class User(ComponentManager, Agent):
         dp = app._register_datapacket(user=self, size=size)
         return dp
 
-    def _start_flow(self, app: "Application", current_step: int):
+    def _start_flow(self, app: "Application"):
         """Starts a network flow to transfer a data packet from the user to its application.
 
         Args:

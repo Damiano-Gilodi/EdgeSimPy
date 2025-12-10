@@ -6,12 +6,11 @@ from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
 from edge_sim_py.components.network_flow import NetworkFlow
+from edge_sim_py.components.network_switch import NetworkSwitch
+from edge_sim_py.components.service import Service
 
 # Mesa modules
 from mesa import Agent  # type: ignore[import]
-
-from edge_sim_py.components.network_switch import NetworkSwitch
-from edge_sim_py.components.service import Service
 
 if TYPE_CHECKING:
     from edge_sim_py.components.application import Application
@@ -55,8 +54,10 @@ class DataPacket(ComponentManager, Agent):
         """Creates a DataPacket object.
 
         Args:
-            obj_id (int, optional): Object identifier.
+            user (User): User object.
+            application (Application): Application object.
             size (int, optional): Size of the data packet in bytes.
+            obj_id (int, optional): Object identifier.
 
         Returns:
             object: Created DataPacket object.
@@ -105,6 +106,11 @@ class DataPacket(ComponentManager, Agent):
         self.unique_id = None
 
     def _to_dict(self) -> dict:
+        """Method that overrides the way the object is formatted to JSON."
+
+        Returns:
+            dict: JSON-friendly representation of the object as a dictionary.
+        """
         return {
             "id": self.id,
             "user": self.user.id,
@@ -142,6 +148,11 @@ class DataPacket(ComponentManager, Agent):
         }
 
     def get_hops(self) -> list[LinkHop]:
+        """Method that returns the data packet's hops.
+
+        Returns:
+            Data packet's hops.
+        """
         return copy.deepcopy(self._link_hops)
 
     def step(self):

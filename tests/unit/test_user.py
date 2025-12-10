@@ -20,7 +20,7 @@ def test_user_start_flow():
     with patch.object(user, "_generate_datapacket", return_value=mock_dp):
         with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
 
-            user._start_flow(app, current_step=0)
+            user._start_flow(app)
 
             assert mock_dp._total_path == [[switch, switch]]
 
