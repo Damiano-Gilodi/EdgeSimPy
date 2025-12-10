@@ -70,14 +70,17 @@ def test_on_flow_finished_intermediate_node():
     flow.metadata = {"index_hop": 0, "index_link": 1}
     flow.end = 3
 
+    dp._current_flow = flow
+
     fake_link_hop = MagicMock()
 
-    with patch.object(dp, "_launch_next_flow") as mock_launch:
-        with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
+    with patch.object(dp, "_add_link_hop", return_value=fake_link_hop):
 
-            dp._on_flow_finished(flow)
+        dp._on_flow_finished(flow)
 
-            mock_launch.assert_called_once_with(start_step=3)
+        assert dp._current_hop == 0
+        assert dp._current_link == 2
+        assert dp._current_flow is None
 
 
 def test_on_flow_finished_hop_complete():
@@ -97,11 +100,16 @@ def test_on_flow_finished_hop_complete():
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 0, "index_link": 2}
 
+    dp._current_flow = flow
+
     with patch.object(dp, "_add_link_hop", return_value=MagicMock()):
 
         dp._on_flow_finished(flow)
 
         service._start_processing.assert_called_once_with(data_packet=dp)
+        assert dp._current_hop == 1
+        assert dp._current_link == 0
+        assert dp._current_flow is None
 
 
 def test_on_flow_finished_validation_link():
