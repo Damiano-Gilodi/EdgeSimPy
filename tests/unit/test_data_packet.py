@@ -27,17 +27,16 @@ def test_zero_negative_size():
 
 def test_launch_next_flow():
 
-    app = MagicMock(spec=Application)
-    model = MagicMock()
-    app.model = model
-
-    dp = DataPacket(user=MagicMock(), application=app)
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
     switch1 = MagicMock(spec=NetworkSwitch)
     switch2 = MagicMock(spec=NetworkSwitch)
     dp._total_path = [[MagicMock(), switch1, switch2, MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
     dp.size = 50
     dp._current_hop = 0
     dp._current_link = 1
+
+    model = MagicMock()
+    dp.model = model
 
     with patch("edge_sim_py.components.data_packet.NetworkFlow") as mock_flow:
 
@@ -58,7 +57,8 @@ def test_launch_next_flow():
             },
         )
 
-        dp.application.model.initialize_agent.assert_called_once_with(mock_flow.return_value)
+        assert dp._current_flow == mock_flow.return_value
+        dp.model.initialize_agent.assert_called_once_with(mock_flow.return_value)
 
 
 def test_on_flow_finished_intermediate_node():
