@@ -365,3 +365,20 @@ def test_step():
         dp.step()
 
         mock_launch.assert_called_once_with(start_step=4)
+
+
+def test_step_processing():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    dp._is_processing = True
+    dp._processing_remaining_time = 0
+
+    model = MagicMock()
+    model.schedule.steps = 4
+    dp.model = model
+
+    with patch.object(dp, "_launch_next_flow") as mock_launch:
+
+        dp.step()
+
+        mock_launch.assert_called_once_with(start_step=4)
