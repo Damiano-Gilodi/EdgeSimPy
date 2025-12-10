@@ -22,7 +22,7 @@ def test_register_data_packet():
     assert app._user_data_packets == {"1": [dp]}
 
 
-def test_collect_with_data_packet():
+def test_collect():
 
     app = Application(obj_id=0)
     service = MagicMock(spec=Service)
@@ -33,79 +33,16 @@ def test_collect_with_data_packet():
     app.users = [u]
 
     data_packet = MagicMock(spec=DataPacket)
-
-    link_hop = LinkHop(
-        hop_index=0,
-        link_index=2,
-        source=3,
-        target=4,
-        start_time=0,
-        end_time=3,
-        queue_delay=3,
-        transmission_delay=3,
-        processing_delay=4,
-        propagation_delay=8,
-        min_bandwidth=10,
-        max_bandwidth=30,
-        avg_bandwidth=20,
-        data_input=5,
-        data_output=10,
-    )
-
     data_packet.id = 3
-    data_packet.user = u
-    data_packet.queue_delay_total = 3
-    data_packet.transmission_delay_total = 3
-    data_packet.processing_delay_total = 4
-    data_packet.propagation_delay_total = 8
-    data_packet.total_delay = 18
-    switch = MagicMock(spec=NetworkSwitch)
-    switch.id = 3
-    switch2 = MagicMock(spec=NetworkSwitch)
-    switch2.id = 4
-    data_packet._total_path = [[switch, switch2], [switch2, switch]]
-    data_packet._link_hops = [link_hop]
 
-    app._user_data_packets = {"1": [data_packet]}
+    app._user_data_packets = {str(u.id): [data_packet]}
 
     assert app.collect() == {
         "Id": 0,
         "Label": "",
         "Services": [1],
         "Users": [2],
-        "Data packets": {
-            "1": [
-                {
-                    "Id": 3,
-                    "User": 2,
-                    "Queue Delay": 3,
-                    "Transmission Delay": 3,
-                    "Processing Delay": 4,
-                    "Propagation Delay": 8,
-                    "Total Delay": 18,
-                    "Total Path": [[3, 4], [4, 3]],
-                    "Hops": [
-                        {
-                            "hop_index": 0,
-                            "link_index": 2,
-                            "source": 3,
-                            "target": 4,
-                            "start_time": 0,
-                            "end_time": 3,
-                            "queue_delay": 3,
-                            "transmission_delay": 3,
-                            "processing_delay": 4,
-                            "propagation_delay": 8,
-                            "min_bandwidth": 10,
-                            "max_bandwidth": 30,
-                            "avg_bandwidth": 20,
-                            "data_input": 5,
-                            "data_output": 10,
-                        }
-                    ],
-                },
-            ],
-        },
+        "Data packets": {"2": [3]},
     }
 
 
