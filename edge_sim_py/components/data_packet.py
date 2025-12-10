@@ -96,7 +96,11 @@ class DataPacket(ComponentManager, Agent):
         # Hops
         self._link_hops: list[LinkHop] = []
 
-    def get_metrics(self) -> dict:
+        # Model-specific attributes (defined inside the model's "initialize()" method)
+        self.model = None
+        self.unique_id = None
+
+    def collect(self) -> dict:
         """Method that collects a set of metrics for the object.
 
         Returns:
