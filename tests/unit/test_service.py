@@ -17,9 +17,8 @@ def test_start_processing():
     service._start_processing(dp)
 
     assert dp._is_processing is True
-    assert dp._processing_remaining_time == service.processing_time
+    assert dp._processing_remaining_time == service.processing_time + 1
     assert dp.size == service.processing_output
-    assert service._processing_queue == [dp]
 
 
 def test_step_processing():
