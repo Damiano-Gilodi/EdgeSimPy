@@ -101,7 +101,18 @@ class DataPacket(ComponentManager, Agent):
         self.unique_id = None
 
     def _to_dict(self) -> dict:
-        return {}
+        return {
+            "id": self.id,
+            "user": self.user.id,
+            "application": self.application.id,
+            "size": self.size,
+            "current_hop": self._current_hop,
+            "current_link": self._current_link,
+            "is_processing": self._is_processing,
+            "processing_remaining_time": self._processing_remaining_time,
+            "total_path": [[sw.id for sw in hop] for hop in self._total_path],
+            "hops": [asdict(hop) for hop in self._link_hops],
+        }
 
     def collect(self) -> dict:
         """Method that collects a set of metrics for the object.
