@@ -15,7 +15,7 @@ from edge_sim_py.components.user_access_patterns.circular_duration_and_interval_
 from edge_sim_py.dataset_generator.edge_servers import jetson_tx2
 from edge_sim_py.dataset_generator.map import hexagonal_grid
 from edge_sim_py.dataset_generator.network_switches import sample_switch
-from edge_sim_py.dataset_generator.network_topologies import partially_connected_hexagonal_mesh
+from edge_sim_py.dataset_generator.network_topologies import partially_connected_fullduplex_hexagonal_mesh
 
 
 def reset_components():
@@ -69,7 +69,7 @@ def basic_topology():
         base_station._connect_to_network_switch(network_switch=network_switch)
 
     # Creating Network Links and Topology
-    topology = partially_connected_hexagonal_mesh(
+    topology = partially_connected_fullduplex_hexagonal_mesh(
         network_nodes=NetworkSwitch.all(),
         link_specifications=[
             {"number_of_objects": 16, "delay": 1, "bandwidth": 10},
