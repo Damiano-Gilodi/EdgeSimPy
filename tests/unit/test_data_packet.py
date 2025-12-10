@@ -253,7 +253,7 @@ def test_add_link_hop_complete():
     assert dp.get_hops() == [link_hop]
 
 
-def test_get_metrics():
+def test_collect():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
     switch = MagicMock(spec=NetworkSwitch)
@@ -294,4 +294,4 @@ def test_get_metrics():
         "Hops": [asdict(link_hop)],
     }
 
-    assert dp.get_metrics() == expected_metrics
+    assert dp.collect() == expected_metrics
