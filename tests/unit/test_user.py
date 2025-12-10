@@ -13,6 +13,9 @@ def test_user_start_flow():
     mock_dp = MagicMock(spec=DataPacket)
     user.communication_paths = {"1": [[1, 2]]}
 
+    model = MagicMock()
+    user.model = model
+
     switch = MagicMock(spec=NetworkSwitch)
     with patch.object(user, "_generate_datapacket", return_value=mock_dp):
         with patch("edge_sim_py.components.network_switch.NetworkSwitch.find_by_id", return_value=switch):
@@ -20,7 +23,8 @@ def test_user_start_flow():
             user._start_flow(app, current_step=0)
 
             assert mock_dp._total_path == [[switch, switch]]
-            mock_dp._launch_next_flow.assert_called_once_with(start_step=0)
+
+            user.model.inizialize_agent.assert_called_once_with(mock_dp)
 
 
 def test_set_packet_size_strategy():
