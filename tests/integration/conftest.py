@@ -104,32 +104,35 @@ def small_app_2_user_4_services(basic_topology):
         service.server = server
         service._available = True
 
-    # Creating the user 1
+    # Creating users
     user1 = User()
     user1.set_packet_size_strategy(mode="fixed", size=20)
     user1._set_initial_position(coordinates=(0, 0))
     user1.mobility_model = _static_dummy_mobility
 
-    # Creating the user 1
     user2 = User()
     user2.set_packet_size_strategy(mode="fixed", size=20)
     user2._set_initial_position(coordinates=(4, 0))
     user2.mobility_model = _static_dummy_mobility
 
-    # Creating the application
-    app = Application()
-    for service in services:
-        app.connect_to_service(service=service)
+    # Creating applications
+    app1 = Application()
+    ordered_services = sorted(services, key=lambda s: s.id)
+    for service in ordered_services:
+        app1.connect_to_service(service=service)
 
-    user1._connect_to_application(app=app, delay_sla=10)
-    user2._connect_to_application(app=app, delay_sla=10)
+    app2 = Application()
+    descending_services = sorted(services, key=lambda s: s.id, reverse=True)
+    for service in descending_services:
+        app2.connect_to_service(service=service)
 
     # Creating the model
     dummy_model = DummyModel()
     dummy_model.topology = basic_topology["topology"]
 
     basic_topology["topology"].model = dummy_model
-    app.model = dummy_model
+    for app in [app1, app2]:
+        app.model = dummy_model
     for user in [user1, user2]:
         user.model = dummy_model
     for service in services:
@@ -137,8 +140,8 @@ def small_app_2_user_4_services(basic_topology):
 
     return {
         "user": [user1, user2],
-        "application": app,
-        "services": services,
+        "application": [app1, app2],
+        "services": ordered_services,
         "model": dummy_model,
     }
 

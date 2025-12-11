@@ -1,6 +1,5 @@
 from edge_sim_py.components.data_packet import DataPacket, LinkHop
 from edge_sim_py.components.network_flow import NetworkFlow
-from edge_sim_py.components.network_link import NetworkLink
 from edge_sim_py.components.network_switch import NetworkSwitch
 from edge_sim_py.components.service import Service
 from edge_sim_py.components.topology import Topology
@@ -11,8 +10,10 @@ from edge_sim_py.components.user_access_patterns.circular_duration_and_interval_
 def test_integration_start_flows(small_app_2_user_4_services):
 
     user = small_app_2_user_4_services["user"][0]
-    app = small_app_2_user_4_services["application"]
+    app = small_app_2_user_4_services["application"][0]
+
     CircularDurationAndIntervalAccessPattern(user=user, app=app, start=1, duration_values=[1], interval_values=[1])
+    user._connect_to_application(app=app, delay_sla=10)
 
     for _ in range(6):  # 3 requests true [1,3,5]
 
@@ -52,8 +53,10 @@ def test_integration_start_flows(small_app_2_user_4_services):
 def test_integration_complete_Networkflow(small_app_2_user_4_services):
 
     user = small_app_2_user_4_services["user"][0]
-    app = small_app_2_user_4_services["application"]
+    app = small_app_2_user_4_services["application"][0]
+
     CircularDurationAndIntervalAccessPattern(user=user, app=app, start=1, duration_values=[1], interval_values=[1])
+    user._connect_to_application(app=app, delay_sla=10)
 
     for _ in range(4):  # 2 requests true [1,3]
 
@@ -112,8 +115,10 @@ def test_integration_complete_Networkflow_Processing(small_app_2_user_4_services
 
     user = small_app_2_user_4_services["user"][0]
     model = small_app_2_user_4_services["model"]
-    app = small_app_2_user_4_services["application"]
+    app = small_app_2_user_4_services["application"][0]
+
     CircularDurationAndIntervalAccessPattern(user=user, app=app, start=1, duration_values=[1], interval_values=[1])
+    user._connect_to_application(app=app, delay_sla=10)
 
     total_links = 0
     while True:
@@ -174,10 +179,12 @@ def test_integration_2_user_bandwidth(small_app_2_user_4_services):
 
     users = small_app_2_user_4_services["user"]
     model = small_app_2_user_4_services["model"]
-    app = small_app_2_user_4_services["application"]
+    app = small_app_2_user_4_services["application"][0]
 
     CircularDurationAndIntervalAccessPattern(user=users[0], app=app, start=1, duration_values=[1], interval_values=[100])
     CircularDurationAndIntervalAccessPattern(user=users[1], app=app, start=1, duration_values=[1], interval_values=[100])
+    users[0]._connect_to_application(app=app, delay_sla=10)
+    users[1]._connect_to_application(app=app, delay_sla=10)
 
     total_links = 0
     while True:
@@ -219,3 +226,67 @@ def test_integration_2_user_bandwidth(small_app_2_user_4_services):
             assert hop.target == data_user2.get_hops()[0].target
             assert data_user1.get_hops()[0].min_bandwidth == 10
             assert data_user2.get_hops()[0].min_bandwidth == 10
+
+
+def test_integration_2_user_2_app(small_app_2_user_4_services):
+
+    users = small_app_2_user_4_services["user"]
+    model = small_app_2_user_4_services["model"]
+    apps = small_app_2_user_4_services["application"]
+
+    CircularDurationAndIntervalAccessPattern(user=users[0], app=apps[0], start=1, duration_values=[1], interval_values=[100])
+    CircularDurationAndIntervalAccessPattern(user=users[1], app=apps[1], start=1, duration_values=[1], interval_values=[100])
+    users[0]._connect_to_application(app=apps[0], delay_sla=6)  # sla defined with only propagation delay
+    users[1]._connect_to_application(app=apps[1], delay_sla=7)  # sla defined with only propagation delay
+
+    while True:
+
+        for agent in DataPacket.all():
+            agent.step()
+
+        for agent in Service.all():
+            agent.step()
+
+        for agent in Topology.all():
+            agent.step()
+
+        for agent in NetworkFlow.all():
+            agent.step()
+
+        for user in User.all():
+            user.step()
+
+        model.schedule.steps += 1
+
+        total_links0 = sum(len(link_hop) - 1 for link_hop in DataPacket.all()[0]._total_path)
+        total_links1 = sum(len(link_hop) - 1 for link_hop in DataPacket.all()[1]._total_path)
+        if len(DataPacket.all()) > 1:
+            if len(DataPacket.all()[0].get_hops()) == total_links0 and len(DataPacket.all()[1].get_hops()) == total_links1:
+                break
+
+    data_user1 = DataPacket.all()[0]
+    data_user2 = DataPacket.all()[1]
+
+    assert data_user1._total_path != data_user2._total_path
+
+    assert len(DataPacket.all()) == 2
+    assert len(NetworkFlow.all()) == sum(len(dp.get_hops()) for dp in DataPacket.all())
+
+    assert data_user1.get_hops()[0].source != data_user2.get_hops()[0].source
+
+    assert data_user1.get_hops()[1].source == data_user2.get_hops()[-1].target
+    assert data_user1.get_hops()[-1].target == data_user2.get_hops()[2].source
+
+    assert users[0].delay_slas["1"] == data_user1.propagation_delay_total
+    assert users[1].delay_slas["2"] == data_user2.propagation_delay_total
+    assert data_user1.total_delay >= users[0].delay_slas["1"]
+    assert data_user2.total_delay >= users[1].delay_slas["2"]
+
+    for data in DataPacket.all():
+        for i, hop in enumerate(data.get_hops()):
+            if i < len(data.get_hops()) - 1:
+                next_hop = data.get_hops()[i + 1]
+                assert hop.end_time == next_hop.start_time
+                assert hop.target == next_hop.source
+
+    assert all(flow.status == "finished" for flow in NetworkFlow.all())
