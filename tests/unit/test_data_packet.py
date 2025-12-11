@@ -123,6 +123,18 @@ def test_on_flow_finished_validation_link():
         dp._on_flow_finished(flow)
 
 
+def test_on_flow_finished_validation_hop():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 2, "index_link": 0}  # valid hop= 0, 1
+
+    with pytest.raises(IndexError, match="Index hop out of range. No more services to process."):
+        dp._on_flow_finished(flow)
+
+
 def test_on_flow_finished_last_link_hop():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock())
