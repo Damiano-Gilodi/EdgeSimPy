@@ -92,7 +92,7 @@ def test_integration_complete_Networkflow(small_app_1_user_4_services):
         source=1,
         target=2,
         start_time=1,
-        end_time=3,
+        end_time=5,
         queue_delay=0,
         transmission_delay=2,
         processing_delay=2,
@@ -158,10 +158,10 @@ def test_integration_complete_Networkflow_Processing(small_app_1_user_4_services
 
             total_delay += hop.transmission_delay + hop.queue_delay + hop.processing_delay + hop.propagation_delay
 
-            assert hop.start_time + hop.transmission_delay + hop.queue_delay == hop.end_time
+            assert hop.start_time + hop.transmission_delay + hop.queue_delay + hop.processing_delay == hop.end_time
 
             if i < len(hops) - 1:
                 next_hop = hops[i + 1]
-                assert hop.end_time + hop.processing_delay == next_hop.start_time
+                assert hop.end_time == next_hop.start_time
 
         assert total_delay == datapacket.total_delay

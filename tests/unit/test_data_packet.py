@@ -244,7 +244,7 @@ def test_add_link_hop_complete():
         source=1,
         target=2,
         start_time=0,
-        end_time=4,
+        end_time=8,
         queue_delay=3,
         transmission_delay=1,
         processing_delay=4,
@@ -369,6 +369,8 @@ def test_step():
 def test_step_processing():
 
     dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
+    dp._current_hop = 0
     dp.size = 10
     dp._is_processing = True
     dp._processing_remaining_time = 0
