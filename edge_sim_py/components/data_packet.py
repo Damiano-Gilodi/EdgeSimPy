@@ -217,8 +217,10 @@ class DataPacket(ComponentManager, Agent):
         if link + 1 >= len(self._total_path[hop]):
             raise IndexError("Index link out of range.")
 
-        # In intermediate node
-        if link + 1 < len(self._total_path[hop]) - 1:
+        is_last_link = link + 1 == len(self._total_path[hop]) - 1
+
+        # In intermediate link node
+        if not is_last_link:
 
             self._add_link_hop(flow)
 
@@ -227,24 +229,20 @@ class DataPacket(ComponentManager, Agent):
             self._current_flow = None
             return
 
-        # In last node hop
-        if hop < len(self._total_path):
+        # In last link node hop
+        service: "Service" = self.application.services[hop]
+        switch: "NetworkSwitch" = self._total_path[hop][link + 1]
 
-            service: "Service" = self.application.services[hop]
-            switch = self._total_path[hop][link + 1]
+        target_server = service.server
+        if target_server not in switch.edge_servers:
+            raise RuntimeError(f"Service {service.id} is assigned to server {target_server.id}, but the packet arrived at switch {switch.id}.")
 
-            servers = switch.edge_servers
+        self._add_link_hop(flow, service=service)
+        service._start_processing(data_packet=self)
 
-            for server in servers:
-                if server == service.server:
-
-                    self._add_link_hop(flow, service=service)
-
-                    service._start_processing(data_packet=self)
-
-            self._current_hop = hop + 1
-            self._current_link = 0
-            self._current_flow = None
+        self._current_hop = hop + 1
+        self._current_link = 0
+        self._current_flow = None
 
     def _add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
         """Method that adds a link hop to the data packet.
