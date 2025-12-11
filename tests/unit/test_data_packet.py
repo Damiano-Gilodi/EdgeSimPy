@@ -159,6 +159,29 @@ def test_on_flow_finished_last_link_hop():
         service._start_processing.assert_called_once_with(data_packet=dp)
 
 
+def test_on_flow_finished_last_link_hop_invalide_switch():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock())
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 1
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), switch]]
+
+    server = MagicMock(spec=EdgeServer)
+    server.id = 1
+    service = MagicMock(spec=Service)
+    service.id = 1
+    service.server = server
+    switch.edge_servers = []
+
+    dp.application.services = [MagicMock(), service]
+
+    flow = MagicMock(spec=NetworkFlow)
+    flow.metadata = {"index_hop": 1, "index_link": 1}
+
+    with pytest.raises(RuntimeError, match="Service 1 is assigned to server 1, but the packet arrived at switch 1."):
+        dp._on_flow_finished(flow)
+
+
 def test_add_link_hop_intermediate_node():
 
     app = MagicMock(spec=Application)
