@@ -164,7 +164,8 @@ class DataPacket(ComponentManager, Agent):
             if self._processing_remaining_time <= 0:
                 self._is_processing = False
                 self.size = self._processing_output
-                self._launch_next_flow(start_step=self.model.schedule.steps)
+                if self._current_hop < len(self._total_path):
+                    self._launch_next_flow(start_step=self.model.schedule.steps)
             return
 
         # Launching the next flow
@@ -253,7 +254,7 @@ class DataPacket(ComponentManager, Agent):
             source=flow.source.id,
             target=flow.target.id,
             start_time=flow.start,
-            end_time=flow.end,
+            end_time=flow.end + (service.processing_time if service else 0),
             queue_delay=flow._queue_delay,
             transmission_delay=(flow.end - flow.start) - flow._queue_delay,
             processing_delay=service.processing_time if service else 0,
