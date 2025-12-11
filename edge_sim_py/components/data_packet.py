@@ -222,20 +222,28 @@ class DataPacket(ComponentManager, Agent):
         # In intermediate link node
         if not is_last_link:
 
-            self._add_link_hop(flow)
-
-            self._current_hop = hop
-            self._current_link = link + 1
-            self._current_flow = None
+            self._handle_intermediate_node(flow, hop, link)
             return
 
         # In last link node hop
+        self._handle_last_node(flow, hop, link)
+
+    def _handle_intermediate_node(self, flow: NetworkFlow, hop: int, link: int):
+        self._add_link_hop(flow)
+
+        self._current_hop = hop
+        self._current_link = link + 1
+        self._current_flow = None
+
+    def _handle_last_node(self, flow: NetworkFlow, hop: int, link: int):
         service: "Service" = self.application.services[hop]
         switch: "NetworkSwitch" = self._total_path[hop][link + 1]
 
         target_server = service.server
         if target_server not in switch.edge_servers:
-            raise RuntimeError(f"Service {service.id} is assigned to server {target_server.id}, but the packet arrived at switch {switch.id}.")
+            raise RuntimeError(
+                f"Service {service.id} is assigned to server {target_server.id if target_server else None}, but the packet arrived at switch {switch.id}."
+            )
 
         self._add_link_hop(flow, service=service)
         service._start_processing(data_packet=self)
