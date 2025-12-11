@@ -182,6 +182,12 @@ class DataPacket(ComponentManager, Agent):
         hop = self._current_hop
         link = self._current_link
 
+        if hop >= len(self._total_path):
+            raise IndexError("Index hop out of range. No more services to process.")
+
+        if link + 1 >= len(self._total_path[hop]):
+            raise IndexError("Index link out of range.")
+
         flow = NetworkFlow(
             topology=self.application.model.topology,
             source=self._total_path[hop][link],
@@ -205,7 +211,10 @@ class DataPacket(ComponentManager, Agent):
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
 
-        if link >= len(self._total_path[hop]) - 1:
+        if hop >= len(self._total_path):
+            raise IndexError("Index hop out of range. No more services to process.")
+
+        if link + 1 >= len(self._total_path[hop]):
             raise IndexError("Index link out of range.")
 
         # In intermediate node
