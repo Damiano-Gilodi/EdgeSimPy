@@ -5,6 +5,7 @@ import networkx as nx  # type: ignore
 import matplotlib.patches as mpatches
 from typing import cast
 
+from edge_sim_py.components.application import Application
 from edge_sim_py.components.base_station import BaseStation
 from edge_sim_py.components.container_registry import ContainerRegistry
 from edge_sim_py.components.service import Service
@@ -72,11 +73,11 @@ def plot_topology():
             offset_y = bs.coordinates[1] - 0.18 - (j * 0.08)
             plt.scatter(offset_x, offset_y, s=400, c="#5DADE2", edgecolors="black", zorder=6)
             if hasattr(user, "applications") and user.applications:
-                app_names = ", ".join([app.label for app in user.applications])
+                app_names = ", ".join(["app: " + (app.label if app.label != "" else str(app.id)) for app in user.applications])
             else:
                 app_names = "no app"
             plt.text(
-                offset_x,
+                offset_x - 0.08,
                 offset_y + 0.08,
                 f"U{user.id}\n{app_names}",
                 fontsize=7.5,
@@ -142,6 +143,32 @@ def plot_topology():
                         alpha=0.8,
                     ),
                 )
+
+    # --- Applicazioni e servizi (textbox in basso) ---
+    app_text_lines = []
+    for app in Application.all():
+        service_labels = [f"S{srv.id}({srv.label})" for srv in app.services]
+        services_str = ", ".join(service_labels) if service_labels else "no services"
+        app_text_lines.append(f"App {app.id} ({app.label}): {services_str}")
+
+    if app_text_lines:
+        final_text = "\n".join(app_text_lines)
+
+        plt.gcf().text(
+            0.01,
+            -0.05,  # posizione sotto la figura
+            final_text,
+            fontsize=9,
+            ha="left",
+            va="top",
+            fontweight="bold",
+            bbox=dict(
+                facecolor="white",
+                edgecolor="black",
+                boxstyle="round,pad=0.4",
+                alpha=0.85,
+            ),
+        )
 
     # Legenda
     legend_elements = [

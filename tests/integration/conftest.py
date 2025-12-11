@@ -84,7 +84,7 @@ def basic_topology():
 
 
 @pytest.fixture
-def small_app_1_user_4_services(basic_topology):
+def small_app_2_user_4_services(basic_topology):
     """A small app with 1 user and 4 services
 
     data packet size = 20
@@ -104,33 +104,39 @@ def small_app_1_user_4_services(basic_topology):
         service.server = server
         service._available = True
 
-    # Creating the user
-    user = User()
-    user.set_packet_size_strategy(mode="fixed", size=20)
-    user._set_initial_position(coordinates=(0, 0))
-    user.mobility_model = _static_dummy_mobility
+    # Creating the user 1
+    user1 = User()
+    user1.set_packet_size_strategy(mode="fixed", size=20)
+    user1._set_initial_position(coordinates=(0, 0))
+    user1.mobility_model = _static_dummy_mobility
+
+    # Creating the user 1
+    user2 = User()
+    user2.set_packet_size_strategy(mode="fixed", size=20)
+    user2._set_initial_position(coordinates=(4, 0))
+    user2.mobility_model = _static_dummy_mobility
 
     # Creating the application
     app = Application()
     for service in services:
         app.connect_to_service(service=service)
 
-    user._connect_to_application(app=app, delay_sla=10)
-
-    CircularDurationAndIntervalAccessPattern(user=user, app=app, start=1, duration_values=[1], interval_values=[1])
+    user1._connect_to_application(app=app, delay_sla=10)
+    user2._connect_to_application(app=app, delay_sla=10)
 
     # Creating the model
     dummy_model = DummyModel()
     dummy_model.topology = basic_topology["topology"]
 
     basic_topology["topology"].model = dummy_model
-    user.model = dummy_model
     app.model = dummy_model
+    for user in [user1, user2]:
+        user.model = dummy_model
     for service in services:
         service.model = dummy_model
 
     return {
-        "user": user,
+        "user": [user1, user2],
         "application": app,
         "services": services,
         "model": dummy_model,
