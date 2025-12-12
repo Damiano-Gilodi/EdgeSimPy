@@ -1,11 +1,18 @@
+from edge_sim_py.components.application import Application
+from edge_sim_py.components.base_station import BaseStation
+from edge_sim_py.components.container_image import ContainerImage
+from edge_sim_py.components.container_layer import ContainerLayer
+from edge_sim_py.components.container_registry import ContainerRegistry
 from edge_sim_py.components.data_packet import DataPacket, LinkHop
+from edge_sim_py.components.edge_server import EdgeServer
 from edge_sim_py.components.network_flow import NetworkFlow
+from edge_sim_py.components.network_link import NetworkLink
 from edge_sim_py.components.network_switch import NetworkSwitch
 from edge_sim_py.components.service import Service
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.user import User
 from edge_sim_py.components.user_access_patterns.circular_duration_and_interval_access_pattern import CircularDurationAndIntervalAccessPattern
-from tests.integration.conftest import _dynamic_dummy_mobility
+from tests.integration.conftest import _dynamic_dummy_mobility, provisioning_algorithm
 
 
 def test_integration_start_flows(small_app_2_user_4_services):
@@ -200,6 +207,7 @@ def test_integration_2_user_bandwidth(small_app_2_user_4_services):
             agent.step()
 
         for agent in NetworkFlow.all():
+            print(agent.id, agent.start, agent.end, agent.data_to_transfer)
             agent.step()
 
         for user in User.all():
@@ -358,3 +366,69 @@ def test_integration_user_dynamic_mobility(small_app_2_user_4_services):
         if i > 1:
             assert hop.source == second_data_user2.get_hops()[i].source
             assert hop.target == second_data_user2.get_hops()[i].target
+
+
+def test_integration_provisioning(small_app_2_user_4_services_provision):
+
+    users = small_app_2_user_4_services_provision["user"]
+    model = small_app_2_user_4_services_provision["model"]
+    apps = small_app_2_user_4_services_provision["application"]
+
+    CircularDurationAndIntervalAccessPattern(user=users[0], app=apps[0], start=1, duration_values=[2], interval_values=[100])
+    CircularDurationAndIntervalAccessPattern(user=users[1], app=apps[1], start=1, duration_values=[2], interval_values=[100])
+    users[0]._connect_to_application(app=apps[0], delay_sla=6)  # sla defined with only propagation delay
+    users[1]._connect_to_application(app=apps[1], delay_sla=7)  # sla defined with only propagation delay
+
+    while True:
+
+        provisioning_algorithm()
+
+        for agent in DataPacket.all():
+            agent.step()
+
+        for agent in EdgeServer.all():
+            agent.step()
+
+        for agent in Service.all():
+            agent.step()
+
+        for agent in Topology.all():
+            agent.step()
+
+        for agent in NetworkFlow.all():
+            agent.step()
+
+        for agent in User.all():
+            agent.step()
+
+        for agent in ContainerRegistry.all():
+            agent.step()
+
+        other_agents = NetworkSwitch.all() + NetworkLink.all() + BaseStation.all() + ContainerLayer.all() + ContainerImage.all() + Application.all()
+        for agent in other_agents:
+            agent.step()
+
+        model.schedule.steps += 1
+
+        if len(DataPacket.all()) > 0:
+            if len(DataPacket.all()[0].get_hops()) == 4 and len(DataPacket.all()[1].get_hops()) == 4:
+                break
+
+    for service in Service.all():
+        assert service.server == EdgeServer.all()[0]
+        assert service._available is True
+
+    assert NetworkFlow.all()[0].source == ContainerRegistry.all()[0].server
+    assert NetworkFlow.all()[0].target == EdgeServer.all()[0]
+
+    data_user1 = DataPacket.all()[0]
+    data_user2 = DataPacket.all()[1]
+
+    assert data_user1.get_hops()[0].start_time == data_user2.get_hops()[0].start_time
+    assert data_user1.get_hops()[-1].end_time == data_user2.get_hops()[-1].end_time
+
+    for i, hop in enumerate(data_user1.get_hops()):
+        if i > 0:
+            assert hop.source == hop.target
+            assert hop.target == data_user2.get_hops()[i].source
+            assert data_user2.get_hops()[i].source == data_user2.get_hops()[i].target

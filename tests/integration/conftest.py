@@ -2,6 +2,9 @@ import pytest
 
 from edge_sim_py.components.application import Application
 from edge_sim_py.components.base_station import BaseStation
+from edge_sim_py.components.container_image import ContainerImage
+from edge_sim_py.components.container_layer import ContainerLayer
+from edge_sim_py.components.container_registry import ContainerRegistry
 from edge_sim_py.components.data_packet import DataPacket
 from edge_sim_py.components.edge_server import EdgeServer
 from edge_sim_py.components.flow_scheduling import max_min_fairness
@@ -19,7 +22,21 @@ from edge_sim_py.dataset_generator.network_topologies import partially_connected
 
 def reset_components():
 
-    for cls in (Topology, NetworkLink, BaseStation, NetworkSwitch, EdgeServer, Service, User, Application, DataPacket, NetworkFlow):
+    for cls in (
+        Topology,
+        NetworkLink,
+        BaseStation,
+        NetworkSwitch,
+        EdgeServer,
+        Service,
+        User,
+        Application,
+        DataPacket,
+        NetworkFlow,
+        ContainerImage,
+        ContainerLayer,
+        ContainerRegistry,
+    ):
         cls._instances = []
         cls._object_count = 0
 
@@ -84,11 +101,10 @@ def basic_topology():
 
 @pytest.fixture
 def small_app_2_user_4_services(basic_topology):
-    """A small app with 1 user and 4 services
+    """A small app with 2 user, 2 app and 4 services.
 
     data packet size = 20
     server n:4, processing time = 2+n, processing output = 10+n
-    requests start = 1, duration = 1, interval = 1
     user position = (0,0) no mobility
     """
     # Creating the Edge Server
@@ -176,6 +192,7 @@ def _services_processing(number_of_services: int):
             state=0,
             processing_time=2 + i,
             processing_output=21 + i,
+            image_digest="sha256:a777c9c66ba177ccfea23f2a216ff6721e78a662cd17019488c417135299cd89",
         )
 
     return Service.all()
@@ -187,3 +204,105 @@ def _static_dummy_mobility(user):
 
 def _dynamic_dummy_mobility(user):
     user.coordinates_trace.append((0, 0))
+
+
+@pytest.fixture
+def small_app_2_user_4_services_provision(basic_topology):
+    """A small app with 2 user, 2 app and 4 services.
+    No service assignment to edge servers.
+
+    data packet size = 20
+    server n:4, processing time = 2+n, processing output = 10+n
+    requests start = 1, duration = 1, interval = 1
+    user position = (0,0) no mobility
+    """
+    # Creating the Edge Server
+    servers = _servers_base_station(number_of_servers=4)
+
+    # Creating the services
+    services = _services_processing(number_of_services=4)
+
+    # Container image
+    image1 = ContainerImage(
+        obj_id=1,
+        name="alpine",
+        tag="",
+        digest="sha256:a777c9c66ba177ccfea23f2a216ff6721e78a662cd17019488c417135299cd89",
+        layers=["sha256:df9b9388f04ad6279a7410b85cedfdcb2208c0a003da7ab5613af71079148139"],
+        architecture="",
+    )
+
+    image1.server = EdgeServer.all()[3]
+    EdgeServer.all()[3].container_images.append(image1)
+
+    # Container layer
+    layer1 = ContainerLayer(
+        obj_id=1, digest="sha256:df9b9388f04ad6279a7410b85cedfdcb2208c0a003da7ab5613af71079148139", size=2, instruction="ADD file:5d673d25da3a14ce1f6cf"
+    )
+
+    layer1.server = EdgeServer.all()[3]
+    EdgeServer.all()[3].container_layers.append(layer1)
+
+    # Container registry
+    registry = ContainerRegistry(obj_id=1, cpu_demand=1, memory_demand=1024)
+
+    registry.server = EdgeServer.all()[3]
+    EdgeServer.all()[3].container_registries.append(registry)
+
+    # Creating users
+    user1 = User()
+    user1.set_packet_size_strategy(mode="fixed", size=20)
+    user1._set_initial_position(coordinates=(0, 0))
+    user1.mobility_model = _static_dummy_mobility
+
+    user2 = User()
+    user2.set_packet_size_strategy(mode="fixed", size=20)
+    user2._set_initial_position(coordinates=(4, 0))
+    user2.mobility_model = _static_dummy_mobility
+
+    # Creating applications
+    app1 = Application()
+    ordered_services = sorted(services, key=lambda s: s.id)
+    for service in ordered_services:
+        app1.connect_to_service(service=service)
+
+    app2 = Application()
+    descending_services = sorted(services, key=lambda s: s.id, reverse=True)
+    for service in descending_services:
+        app2.connect_to_service(service=service)
+
+    # Creating the model
+    dummy_model = DummyModel()
+    dummy_model.topology = basic_topology["topology"]
+
+    basic_topology["topology"].model = dummy_model
+    for app in [app1, app2]:
+        app.model = dummy_model
+    for user in [user1, user2]:
+        user.model = dummy_model
+    for service in services:
+        service.model = dummy_model
+    for server in servers:
+        server.model = dummy_model
+
+    return {
+        "user": [user1, user2],
+        "application": [app1, app2],
+        "services": ordered_services,
+        "servers": servers,
+        "model": dummy_model,
+    }
+
+
+def provisioning_algorithm():
+    # First server with capacity to provision every service
+    for service in Service.all():
+        if service.server is None and not service.being_provisioned:
+
+            for edge_server in EdgeServer.all():
+
+                if edge_server.has_capacity_to_host(service=service):
+
+                    service.provision(target_server=edge_server)
+
+                    break
