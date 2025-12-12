@@ -185,6 +185,11 @@ class DataPacket(ComponentManager, Agent):
         if hop >= len(self._total_path):
             raise IndexError("Index hop out of range. No more services to process.")
 
+        # If hop has only one node -> skip flow
+        if len(self._total_path[hop]) == 1:
+            self._handle_last_node(flow=None, hop=hop, link=link)
+            return
+
         if link + 1 >= len(self._total_path[hop]):
             raise IndexError("Index link out of range.")
 
