@@ -5,6 +5,7 @@ from edge_sim_py.components.service import Service
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.user import User
 from edge_sim_py.components.user_access_patterns.circular_duration_and_interval_access_pattern import CircularDurationAndIntervalAccessPattern
+from tests.integration.conftest import _dynamic_dummy_mobility
 
 
 def test_integration_start_flows(small_app_2_user_4_services):
@@ -290,3 +291,70 @@ def test_integration_2_user_2_app(small_app_2_user_4_services):
                 assert hop.target == next_hop.source
 
     assert all(flow.status == "finished" for flow in NetworkFlow.all())
+
+
+def test_integration_user_dynamic_mobility(small_app_2_user_4_services):
+
+    # user1 static (0,0)
+    # user2 dynamic 1:(4,0), 2:(0,0)
+    users = small_app_2_user_4_services["user"]
+    model = small_app_2_user_4_services["model"]
+    apps = small_app_2_user_4_services["application"]
+
+    CircularDurationAndIntervalAccessPattern(user=users[0], app=apps[0], start=1, duration_values=[2], interval_values=[100])
+    CircularDurationAndIntervalAccessPattern(user=users[1], app=apps[1], start=1, duration_values=[2], interval_values=[100])
+    users[0]._connect_to_application(app=apps[0], delay_sla=6)  # sla defined with only propagation delay
+    users[1]._connect_to_application(app=apps[1], delay_sla=7)  # sla defined with only propagation delay
+
+    users[1].mobility_model = _dynamic_dummy_mobility
+
+    while True:
+
+        for agent in DataPacket.all():
+            agent.step()
+
+        for agent in Service.all():
+            agent.step()
+
+        for agent in Topology.all():
+            agent.step()
+
+        for agent in NetworkFlow.all():
+            agent.step()
+
+        for user in User.all():
+            user.step()
+
+        model.schedule.steps += 1
+
+        total_links0 = sum(len(link_hop) - 1 for link_hop in DataPacket.all()[0]._total_path)
+        total_links1 = sum(len(link_hop) - 1 for link_hop in DataPacket.all()[1]._total_path)
+        if len(DataPacket.all()) > 2:
+            if len(DataPacket.all()[2].get_hops()) == total_links0 and len(DataPacket.all()[3].get_hops()) == total_links1:
+                break
+
+    data_user1 = DataPacket.all()[0]
+    data_user2 = DataPacket.all()[1]
+
+    second_data_user1 = DataPacket.all()[2]
+    second_data_user2 = DataPacket.all()[3]  # data after change location
+
+    assert data_user1._total_path == second_data_user1._total_path
+    assert data_user2._total_path != second_data_user2._total_path
+
+    assert second_data_user2.get_hops()[0].source == second_data_user1.get_hops()[0].source
+
+    assert data_user2.get_hops()[0].source == 3
+    assert data_user2.get_hops()[0].target == 5
+    assert data_user2.get_hops()[1].source == 5
+
+    assert second_data_user2.get_hops()[0].source == 1
+    assert second_data_user2.get_hops()[0].target == 4
+    assert second_data_user2.get_hops()[1].source == 4
+
+    assert second_data_user2.get_hops()[1].target == data_user2.get_hops()[1].target
+
+    for i, hop in enumerate(data_user2.get_hops()):
+        if i > 1:
+            assert hop.source == second_data_user2.get_hops()[i].source
+            assert hop.target == second_data_user2.get_hops()[i].target

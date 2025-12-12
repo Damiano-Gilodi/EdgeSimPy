@@ -11,7 +11,6 @@ from edge_sim_py.components.network_switch import NetworkSwitch
 from edge_sim_py.components.service import Service
 from edge_sim_py.components.topology import Topology
 from edge_sim_py.components.user import User
-from edge_sim_py.components.user_access_patterns.circular_duration_and_interval_access_pattern import CircularDurationAndIntervalAccessPattern
 from edge_sim_py.dataset_generator.edge_servers import jetson_tx2
 from edge_sim_py.dataset_generator.map import hexagonal_grid
 from edge_sim_py.dataset_generator.network_switches import sample_switch
@@ -184,3 +183,7 @@ def _services_processing(number_of_services: int):
 
 def _static_dummy_mobility(user):
     user.coordinates_trace.append(user.coordinates)
+
+
+def _dynamic_dummy_mobility(user):
+    user.coordinates_trace.append((0, 0))
