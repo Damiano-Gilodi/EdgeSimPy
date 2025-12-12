@@ -153,7 +153,7 @@ class DataPacket(ComponentManager, Agent):
         Returns:
             Data packet's hops.
         """
-        return copy.deepcopy(self._link_hops)
+        return self._link_hops.copy()
 
     def step(self):
         """Method that executes the events involving the object at each time step."""
@@ -229,13 +229,28 @@ class DataPacket(ComponentManager, Agent):
         self._handle_last_node(flow, hop, link)
 
     def _handle_intermediate_node(self, flow: NetworkFlow, hop: int, link: int):
+        """Method that handles the intermediate node of a flow.
+
+        Args:
+            flow (NetworkFlow): Network flow.
+            hop (int): Hop index.
+            link (int): Link index.
+        """
         self._add_link_hop(flow)
 
         self._current_hop = hop
         self._current_link = link + 1
         self._current_flow = None
 
-    def _handle_last_node(self, flow: NetworkFlow, hop: int, link: int):
+    def _handle_last_node(self, flow: NetworkFlow | None, hop: int, link: int):
+        """Method that handles the last node of a flow.
+        If flow is None, it means that hop have only one node.
+
+        Args:
+            flow (NetworkFlow): Network flow.
+            hop (int): Hop index.
+            link (int): Link index.
+        """
         service: "Service" = self.application.services[hop]
         switch: "NetworkSwitch" = self._total_path[hop][link + 1]
 

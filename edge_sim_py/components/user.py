@@ -250,7 +250,7 @@ class User(ComponentManager, Agent):
 
                 # Finding and storing the best communication path between the origin and target nodes
                 if origin == target:
-                    path = []
+                    path = [origin.network_switch]
                 else:
                     path = nx.shortest_path(
                         G=topology,

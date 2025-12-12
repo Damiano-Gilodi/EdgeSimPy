@@ -422,3 +422,23 @@ def test_step_processing():
         mock_launch.assert_called_once_with(start_step=4)
         assert dp._is_processing is False
         assert dp.size == 5
+
+
+def test_all_service_same_server_launch_next_flow():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 3
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 4
+
+    dp._total_path = [[switch, switch2], [switch], [switch]]
+    dp._current_hop = 1
+    dp._current_link = 0
+
+    with patch.object(dp, "_handle_last_node") as mock_handle:
+
+        dp._launch_next_flow(start_step=4)
+
+        mock_handle.assert_called_once_with(flow=None, hop=1, link=0)
