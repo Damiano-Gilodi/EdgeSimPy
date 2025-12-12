@@ -450,15 +450,13 @@ def test_all_service_same_server_handle_last_node():
 
     switch = MagicMock(spec=NetworkSwitch)
     switch.id = 3
-    switch2 = MagicMock(spec=NetworkSwitch)
-    switch2.id = 4
 
-    dp._total_path = [MagicMock(), [switch2], MagicMock()]
+    dp._total_path = [MagicMock(), [switch], MagicMock()]
     dp._current_hop = 1
     dp._current_link = 0
 
     server = MagicMock(spec=EdgeServer)
-    switch2.edge_servers = [server]
+    switch.edge_servers = [server]
 
     service = MagicMock(spec=Service)
     service.server = server
@@ -470,3 +468,43 @@ def test_all_service_same_server_handle_last_node():
         dp._handle_last_node(flow=None, hop=1, link=0)
 
         service._start_processing.assert_called_once_with(data_packet=dp)
+
+
+def test_all_service_same_server_add_link_hop():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 3
+
+    dp._total_path = [MagicMock(), [switch], MagicMock()]
+    dp._current_hop = 1
+    linkhop = MagicMock(spec=LinkHop)
+    linkhop.end_time = 5
+    dp._link_hops = [linkhop]
+
+    service = MagicMock(spec=Service)
+    service.processing_time = 4
+    service.processing_output = 10
+
+    expected = LinkHop(
+        hop_index=1,
+        link_index=0,
+        source=3,
+        target=3,
+        start_time=5,
+        end_time=9,
+        queue_delay=0,
+        transmission_delay=0,
+        processing_delay=4,
+        propagation_delay=0,
+        min_bandwidth=0,
+        max_bandwidth=0,
+        avg_bandwidth=0,
+        data_input=50,
+        data_output=10,
+    )
+
+    dp._add_link_hop(flow=None, service=service)
+
+    assert dp._link_hops[-1] == expected
