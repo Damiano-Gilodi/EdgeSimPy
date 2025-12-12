@@ -442,3 +442,31 @@ def test_all_service_same_server_launch_next_flow():
         dp._launch_next_flow(start_step=4)
 
         mock_handle.assert_called_once_with(flow=None, hop=1, link=0)
+
+
+def test_all_service_same_server_handle_last_node():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+
+    switch = MagicMock(spec=NetworkSwitch)
+    switch.id = 3
+    switch2 = MagicMock(spec=NetworkSwitch)
+    switch2.id = 4
+
+    dp._total_path = [MagicMock(), [switch2], MagicMock()]
+    dp._current_hop = 1
+    dp._current_link = 0
+
+    server = MagicMock(spec=EdgeServer)
+    switch2.edge_servers = [server]
+
+    service = MagicMock(spec=Service)
+    service.server = server
+
+    dp.application.services = [MagicMock(), service]
+
+    with patch.object(dp, "_add_link_hop", return_value=MagicMock()):
+
+        dp._handle_last_node(flow=None, hop=1, link=0)
+
+        service._start_processing.assert_called_once_with(data_packet=dp)
