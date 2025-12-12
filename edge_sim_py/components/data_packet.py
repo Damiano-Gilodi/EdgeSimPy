@@ -257,7 +257,11 @@ class DataPacket(ComponentManager, Agent):
             link (int): Link index.
         """
         service: "Service" = self.application.services[hop]
-        switch: "NetworkSwitch" = self._total_path[hop][link + 1]
+
+        if flow is None:
+            switch: "NetworkSwitch" = self._total_path[hop][0]
+        else:
+            switch = self._total_path[hop][link + 1]
 
         target_server = service.server
         if target_server not in switch.edge_servers:
@@ -272,7 +276,7 @@ class DataPacket(ComponentManager, Agent):
         self._current_link = 0
         self._current_flow = None
 
-    def _add_link_hop(self, flow: NetworkFlow, service: "Service | None" = None):
+    def _add_link_hop(self, flow: NetworkFlow | None, service: "Service | None" = None):
         """Method that adds a link hop to the data packet.
 
         Args:
