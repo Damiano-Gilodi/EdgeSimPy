@@ -1,7 +1,6 @@
 """Contains data packet-related functionality."""
 
 # EdgeSimPy components
-import copy
 from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 from edge_sim_py.component_manager import ComponentManager
@@ -278,11 +277,37 @@ class DataPacket(ComponentManager, Agent):
 
     def _add_link_hop(self, flow: NetworkFlow | None, service: "Service | None" = None):
         """Method that adds a link hop to the data packet.
+        If no flow is provided, it adds the current hop.
 
         Args:
             flow (NetworkFlow): Network flow.
             service (Service, optional): Service associated with the flow. Defaults to None.
         """
+        if flow is None:
+
+            hop = self._current_hop
+            link = 0
+
+            link_hop = LinkHop(
+                hop_index=hop,
+                link_index=link,
+                source=self._total_path[hop][link].id,
+                target=self._total_path[hop][link].id,
+                start_time=self._link_hops[-1].end_time,
+                end_time=self._link_hops[-1].end_time + (service.processing_time if service else 0),
+                queue_delay=0,
+                transmission_delay=0,
+                processing_delay=service.processing_time if service else 0,
+                propagation_delay=0,
+                min_bandwidth=0,
+                max_bandwidth=0,
+                avg_bandwidth=0,
+                data_input=self.size,
+                data_output=service.processing_output if service else self.size,
+            )
+
+            self._link_hops.append(link_hop)
+            return
 
         hop = flow.metadata["index_hop"]
         link = flow.metadata["index_link"]
