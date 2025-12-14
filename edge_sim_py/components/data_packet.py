@@ -82,6 +82,9 @@ class DataPacket(ComponentManager, Agent):
         # User
         self.user: "User" = user
 
+        # Status: active(default), finished, processing, dropped
+        self._status = "active"
+
         # Total path (list of hop nodes between services)
         self._total_path: list[list[NetworkSwitch]] = []
 
@@ -115,6 +118,7 @@ class DataPacket(ComponentManager, Agent):
             "user": self.user.id,
             "application": self.application.id,
             "size": self.size,
+            "status": self._status,
             "current_hop": self._current_hop,
             "current_link": self._current_link,
             "is_processing": self._is_processing,
@@ -137,6 +141,7 @@ class DataPacket(ComponentManager, Agent):
             "User": self.user.id,
             "Application": self.application.id,
             "Size": self.size,
+            "Status": self._status,
             "Queue Delay": self.queue_delay_total,
             "Transmission Delay": self.transmission_delay_total,
             "Processing Delay": self.processing_delay_total,
@@ -164,13 +169,18 @@ class DataPacket(ComponentManager, Agent):
                 self._is_processing = False
                 self.size = self._processing_output
                 if self._current_hop < len(self._total_path):
+                    self._status = "active"
                     self._launch_next_flow(start_step=self.model.schedule.steps)
+                else:
+                    self._status = "finished"
             return
 
         # Launching the next flow
         if self._current_hop < len(self._total_path):
             if self._current_flow is None:
                 self._launch_next_flow(start_step=self.model.schedule.steps)
+        else:
+            self._status = "finished"
 
     def _launch_next_flow(self, start_step):
         """Method that lauches the next flow.
@@ -264,13 +274,14 @@ class DataPacket(ComponentManager, Agent):
 
         target_server = service.server
         if target_server not in switch.edge_servers:
-            raise RuntimeError(
-                f"Service {service.id} is assigned to server {target_server.id if target_server else None}, but the packet arrived at switch {switch.id}."
-            )
+            self._status = "dropped"
+            self._current_flow = None
+            return
 
         self._add_link_hop(flow, service=service)
         service._start_processing(data_packet=self)
 
+        self._status = "processing"
         self._current_hop = hop + 1
         self._current_link = 0
         self._current_flow = None
