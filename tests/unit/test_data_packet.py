@@ -56,6 +56,7 @@ def test_launch_next_flow():
             },
         )
 
+        assert dp._status == "active"
         assert dp._current_flow == mock_flow.return_value
         dp.model.initialize_agent.assert_called_once_with(mock_flow.return_value)
 
@@ -80,6 +81,7 @@ def test_on_flow_finished_intermediate_node():
         assert dp._current_hop == 0
         assert dp._current_link == 2
         assert dp._current_flow is None
+        assert dp._status == "active"
 
 
 def test_on_flow_finished_hop_complete():
@@ -109,6 +111,7 @@ def test_on_flow_finished_hop_complete():
         assert dp._current_hop == 1
         assert dp._current_link == 0
         assert dp._current_flow is None
+        assert dp._status == "processing"
 
 
 def test_on_flow_finished_validation_link():
@@ -157,6 +160,7 @@ def test_on_flow_finished_last_link_hop():
         dp._on_flow_finished(flow)
 
         service._start_processing.assert_called_once_with(data_packet=dp)
+        assert dp._status == "processing"
 
 
 def test_on_flow_finished_last_link_hop_invalide_switch():
@@ -178,8 +182,13 @@ def test_on_flow_finished_last_link_hop_invalide_switch():
     flow = MagicMock(spec=NetworkFlow)
     flow.metadata = {"index_hop": 1, "index_link": 1}
 
-    with pytest.raises(RuntimeError, match="Service 1 is assigned to server 1, but the packet arrived at switch 1."):
-        dp._on_flow_finished(flow)
+    dp._on_flow_finished(flow)
+
+    assert dp._status == "dropped"
+    assert dp._current_flow is None
+
+    # with pytest.raises(RuntimeError, match="Service 1 is assigned to server 1, but the packet arrived at switch 1."):
+    #     dp._on_flow_finished(flow)
 
 
 def test_add_link_hop_intermediate_node():
@@ -328,6 +337,7 @@ def test_collect():
         "User": dp.user.id,
         "Application": dp.application.id,
         "Size": dp.size,
+        "Status": dp._status,
         "Queue Delay": 3,
         "Transmission Delay": 3,
         "Processing Delay": 4,
@@ -372,6 +382,7 @@ def test_to_dict():
         "user": dp.user.id,
         "application": dp.application.id,
         "size": dp.size,
+        "status": dp._status,
         "current_hop": dp._current_hop,
         "current_link": dp._current_link,
         "is_processing": dp._is_processing,
@@ -399,6 +410,7 @@ def test_step():
         dp.step()
 
         mock_launch.assert_called_once_with(start_step=4)
+        assert dp._status == "active"
 
 
 def test_step_processing():
@@ -422,6 +434,7 @@ def test_step_processing():
         mock_launch.assert_called_once_with(start_step=4)
         assert dp._is_processing is False
         assert dp.size == 5
+        assert dp._status == "active"
 
 
 def test_all_service_same_server_launch_next_flow():
@@ -468,6 +481,7 @@ def test_all_service_same_server_handle_last_node():
         dp._handle_last_node(flow=None, hop=1, link=0)
 
         service._start_processing.assert_called_once_with(data_packet=dp)
+        assert dp._status == "processing"
 
 
 def test_all_service_same_server_add_link_hop():
@@ -508,3 +522,22 @@ def test_all_service_same_server_add_link_hop():
     dp._add_link_hop(flow=None, service=service)
 
     assert dp._link_hops[-1] == expected
+
+
+def test_step_finished():
+
+    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
+    dp._current_hop = 2
+    dp._current_flow = None
+
+    dp.step()
+
+    assert dp._status == "finished"
+
+    dp._is_processing = True
+    dp._processing_remaining_time = 1
+
+    dp.step()
+
+    assert dp._status == "finished"
