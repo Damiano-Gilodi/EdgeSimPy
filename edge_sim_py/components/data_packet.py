@@ -169,6 +169,7 @@ class DataPacket(ComponentManager, Agent):
             service = self.application.services[self._current_hop - 1]
 
             if service.server is None or service.server.network_switch != self._processing_switch:
+                self._link_hops.remove(self._link_hops[-1])
                 self._status = "dropped"
                 self._is_processing = False
                 return
@@ -186,7 +187,7 @@ class DataPacket(ComponentManager, Agent):
 
         # Launching the next flow
         if self._current_hop < len(self._total_path):
-            if self._current_flow is None:
+            if self._current_flow is None and self._status == "active":
                 self._launch_next_flow(start_step=self.model.schedule.steps)
         else:
             self._status = "finished"

@@ -432,3 +432,62 @@ def test_integration_provisioning(small_app_2_user_4_services_provision):
             assert hop.source == hop.target
             assert hop.target == data_user2.get_hops()[i].source
             assert data_user2.get_hops()[i].source == data_user2.get_hops()[i].target
+
+
+def test_integration_migration(small_app_2_user_4_services_provision):
+
+    users = small_app_2_user_4_services_provision["user"]
+    model = small_app_2_user_4_services_provision["model"]
+    apps = small_app_2_user_4_services_provision["application"]
+
+    CircularDurationAndIntervalAccessPattern(user=users[0], app=apps[0], start=1, duration_values=[2], interval_values=[100])
+    CircularDurationAndIntervalAccessPattern(user=users[1], app=apps[1], start=1, duration_values=[2], interval_values=[100])
+    users[0]._connect_to_application(app=apps[0], delay_sla=6)  # sla defined with only propagation delay
+    users[1]._connect_to_application(app=apps[1], delay_sla=7)  # sla defined with only propagation delay
+
+    while True:
+
+        provisioning_algorithm()
+
+        if model.schedule.steps == 10:
+            Service.find_by_id(2).server = EdgeServer.find_by_id(2)
+
+        for agent in DataPacket.all():
+            agent.step()
+
+        for agent in EdgeServer.all():
+            agent.step()
+
+        for agent in Service.all():
+            agent.step()
+
+        for agent in Topology.all():
+            agent.step()
+
+        for agent in NetworkFlow.all():
+            agent.step()
+
+        for agent in User.all():
+            agent.step()
+
+        for agent in ContainerRegistry.all():
+            agent.step()
+
+        other_agents = NetworkSwitch.all() + NetworkLink.all() + BaseStation.all() + ContainerLayer.all() + ContainerImage.all() + Application.all()
+        for agent in other_agents:
+            agent.step()
+
+        model.schedule.steps += 1
+
+        if model.schedule.steps > 20:
+            break
+
+    for data in DataPacket.all():
+        assert data._status == "dropped"
+        assert data._is_processing is False
+
+    data_user1 = DataPacket.all()[0]
+    data_user2 = DataPacket.all()[1]
+
+    assert len(data_user1.get_hops()) == 2
+    assert len(data_user2.get_hops()) == 1
