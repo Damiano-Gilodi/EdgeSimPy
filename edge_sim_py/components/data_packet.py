@@ -96,6 +96,7 @@ class DataPacket(ComponentManager, Agent):
         self._is_processing = False
         self._processing_remaining_time = 0
         self._processing_output = 0
+        self._processing_switch = None
 
         # Hops
         self._link_hops: list[LinkHop] = []
@@ -164,6 +165,14 @@ class DataPacket(ComponentManager, Agent):
 
         # Processing
         if self._is_processing:
+
+            service = self.application.services[self._current_hop - 1]
+
+            if service.server is None or service.server.network_switch != self._processing_switch:
+                self._status = "dropped"
+                self._is_processing = False
+                return
+
             self._processing_remaining_time -= 1
             if self._processing_remaining_time <= 0:
                 self._is_processing = False
@@ -281,6 +290,7 @@ class DataPacket(ComponentManager, Agent):
         self._add_link_hop(flow, service=service)
         service._start_processing(data_packet=self)
 
+        self._processing_switch = switch
         self._status = "processing"
         self._current_hop = hop + 1
         self._current_link = 0
