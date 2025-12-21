@@ -187,9 +187,6 @@ def test_on_flow_finished_last_link_hop_invalide_switch():
     assert dp._status == "dropped"
     assert dp._current_flow is None
 
-    # with pytest.raises(RuntimeError, match="Service 1 is assigned to server 1, but the packet arrived at switch 1."):
-    #     dp._on_flow_finished(flow)
-
 
 def test_add_link_hop_intermediate_node():
 
@@ -415,13 +412,26 @@ def test_step():
 
 def test_step_processing():
 
-    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    app = MagicMock(spec=Application)
+
+    service = MagicMock(spec=Service)
+    server = MagicMock(spec=EdgeServer)
+    switch = MagicMock()
+    server.network_switch = switch
+
+    service.server = server
+
+    app.services = [service, MagicMock()]
+
+    dp = DataPacket(user=MagicMock(), application=app)
     dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
-    dp._current_hop = 0
+    dp._current_hop = 1
     dp.size = 10
     dp._is_processing = True
     dp._processing_remaining_time = 0
     dp._processing_output = 5
+
+    dp._processing_switch = switch
 
     model = MagicMock()
     model.schedule.steps = 4
@@ -435,6 +445,35 @@ def test_step_processing():
         assert dp._is_processing is False
         assert dp.size == 5
         assert dp._status == "active"
+
+
+def test_step_processing_dropped():
+
+    app = MagicMock(spec=Application)
+
+    service = MagicMock(spec=Service)
+    server = MagicMock(spec=EdgeServer)
+    server.network_switch = MagicMock()
+
+    service.server = server
+
+    app.services = [service, MagicMock()]
+
+    dp = DataPacket(user=MagicMock(), application=app)
+    dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
+    dp._is_processing = True
+    dp._current_hop = 1
+
+    dp._processing_switch = MagicMock()
+
+    model = MagicMock()
+    model.schedule.steps = 4
+    dp.model = model
+
+    dp.step()
+
+    assert dp._is_processing is False
+    assert dp._status == "dropped"
 
 
 def test_all_service_same_server_launch_next_flow():
@@ -526,10 +565,23 @@ def test_all_service_same_server_add_link_hop():
 
 def test_step_finished():
 
-    dp = DataPacket(user=MagicMock(), application=MagicMock(), size=50)
+    app = MagicMock(spec=Application)
+
+    service = MagicMock(spec=Service)
+    server = MagicMock(spec=EdgeServer)
+    switch = MagicMock()
+    server.network_switch = switch
+
+    service.server = server
+
+    app.services = [MagicMock(), service]
+
+    dp = DataPacket(user=MagicMock(), application=app)
     dp._total_path = [[MagicMock(), MagicMock(), MagicMock(), MagicMock()], [MagicMock(), MagicMock(), MagicMock()]]
     dp._current_hop = 2
     dp._current_flow = None
+
+    dp._processing_switch = switch
 
     dp.step()
 
