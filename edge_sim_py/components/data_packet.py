@@ -169,7 +169,6 @@ class DataPacket(ComponentManager, Agent):
             service = self.application.services[self._current_hop - 1]
 
             if service.server is None or service.server.network_switch != self._processing_switch:
-                self._link_hops.remove(self._link_hops[-1])
                 self._status = "dropped"
                 self._is_processing = False
                 return

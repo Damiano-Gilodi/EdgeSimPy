@@ -6,6 +6,8 @@ from edge_sim_py.components import *
 # Mesa modules
 from mesa.time import BaseScheduler as MesaBaseScheduler
 
+from edge_sim_py.components.data_packet import DataPacket
+
 
 class DefaultScheduler(MesaBaseScheduler):
     """Class responsible for scheduling the events that take place at each step of the simulation model."""
@@ -40,6 +42,9 @@ class DefaultScheduler(MesaBaseScheduler):
                 - Container Registries
                 - Applications
         """
+        for agent in DataPacket.all():
+            agent.step()
+
         for agent in EdgeServer.all():
             agent.step()
 

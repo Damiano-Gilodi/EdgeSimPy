@@ -101,6 +101,7 @@ class User(ComponentManager, Agent):
                 "communication_paths": copy.deepcopy(self.communication_paths),
                 "making_requests": copy.deepcopy(self.making_requests),
                 "mobility_model_parameters": copy.deepcopy(self.mobility_model_parameters) if self.mobility_model_parameters else {},
+                "packet_size_strategy": copy.deepcopy(self.packet_size_strategy),
             },
             "relationships": {
                 "access_patterns": access_patterns,

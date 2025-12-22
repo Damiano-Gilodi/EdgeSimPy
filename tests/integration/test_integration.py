@@ -485,9 +485,4 @@ def test_integration_migration(small_app_2_user_4_services_provision):
     for data in DataPacket.all():
         assert data._status == "dropped"
         assert data._is_processing is False
-
-    data_user1 = DataPacket.all()[0]
-    data_user2 = DataPacket.all()[1]
-
-    assert len(data_user1.get_hops()) == 2
-    assert len(data_user2.get_hops()) == 1
+        assert len(data.get_hops()) == 2
