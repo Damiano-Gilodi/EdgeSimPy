@@ -50,3 +50,11 @@ def build_sla_summary(df, group_cols):
     summary[["Mean_Violating_Margin_Perc", "Median_Violating_Margin_Perc"]] = summary[["Mean_Violating_Margin_Perc", "Median_Violating_Margin_Perc"]].fillna(0)
 
     return summary.round(3)
+
+
+def get_padded_ylim(series, padding_ratio=0.05):
+    y_min = series.min()
+    y_max = series.max()
+    y_range = y_max - y_min
+    padding = y_range * padding_ratio if y_range > 0 else 1
+    return y_min - padding, y_max + padding
