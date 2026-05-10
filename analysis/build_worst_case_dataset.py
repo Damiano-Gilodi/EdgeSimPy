@@ -1,3 +1,5 @@
+import re
+
 from adapters.cavia.utils.path import BASE_PATH
 import msgpack  # type: ignore
 import pandas as pd  # type: ignore
@@ -46,6 +48,7 @@ def build_worst_case_dataset(base_logs_path):
         df["Distribution"] = distribution
         df["Scenario"] = scenario
         df["App_ms"] = app_name
+        df["App_group"] = re.sub(r"^\d+", "", app_name)
         df["Run"] = run_id
         df["Delay SLAs"] = sla
 
@@ -62,6 +65,7 @@ def build_worst_case_dataset(base_logs_path):
                 "Distribution",
                 "Scenario",
                 "App_ms",
+                "App_group",
                 "Run",
                 "User",
                 "Application",
