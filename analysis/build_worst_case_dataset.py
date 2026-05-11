@@ -1,9 +1,11 @@
+import re
+
+from adapters.cavia.utils.path import BASE_PATH
 import msgpack  # type: ignore
 import pandas as pd  # type: ignore
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
-LOGS_PATH = BASE_DIR.parent / "simulation" / "cavia_simulation" / "logs"
+LOGS_PATH = BASE_PATH / "simulation" / "cavia_simulation" / "logs"
 
 
 def build_worst_case_dataset(base_logs_path):
@@ -31,9 +33,9 @@ def build_worst_case_dataset(base_logs_path):
         with open(packet_file, "rb") as f:
             df_p = pd.DataFrame(msgpack.unpackb(f.read(), strict_map_key=False))
 
-        df = df_p[df_p["Status"] == "finished"]
+        df = df_p[df_p["Status"] == "finished"].copy()
 
-        if df_p.empty:
+        if df.empty:
             raise ValueError(f"No finished DataPacket found in {packet_file}")
 
         with open(user_file, "rb") as f:
@@ -46,6 +48,7 @@ def build_worst_case_dataset(base_logs_path):
         df["Distribution"] = distribution
         df["Scenario"] = scenario
         df["App_ms"] = app_name
+        df["App_group"] = re.sub(r"^\d+", "", app_name)
         df["Run"] = run_id
         df["Delay SLAs"] = sla
 
@@ -62,6 +65,7 @@ def build_worst_case_dataset(base_logs_path):
                 "Distribution",
                 "Scenario",
                 "App_ms",
+                "App_group",
                 "Run",
                 "User",
                 "Application",
