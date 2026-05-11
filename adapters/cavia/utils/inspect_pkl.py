@@ -3,7 +3,7 @@ import pickle
 
 from adapters.cavia.utils.path import PKL_PATH
 
-pkl_path = os.path.join(PKL_PATH, "2_26_solution_v0/var_coeff_values_2SSM_slss.pkl")
+pkl_path = os.path.join(PKL_PATH, "1_26_solution_v0/var_coeff_values_1SMM_slss.pkl")
 
 
 with open(pkl_path, "rb") as f:
@@ -24,3 +24,7 @@ print("sol_count:", data["sol_count"])
 x_ui = data.get("x_ui", {})
 x_ui_active = {k: v for k, v in x_ui.items() if v > 0.5}
 print("\nx_ui_active:", x_ui_active)
+
+print("\nc_i:", data.get("c_i", {}))
+
+print("\nq_u:", data.get("q_u", {}))
