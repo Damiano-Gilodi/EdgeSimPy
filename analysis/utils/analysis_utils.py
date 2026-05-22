@@ -1,3 +1,7 @@
+import matplotlib.pyplot as plt  # type: ignore
+import seaborn as sns  # type: ignore
+
+
 def build_sla_summary(df, group_cols):
     if isinstance(group_cols, str):
         group_cols = [group_cols]
@@ -58,3 +62,19 @@ def get_padded_ylim(series, padding_ratio=0.05):
     y_range = y_max - y_min
     padding = y_range * padding_ratio if y_range > 0 else 1
     return y_min - padding, y_max + padding
+
+
+def plot_heatmap_from_data(heatmap_data, title, cbar_label, figsize=(8, 5)):
+    heatmap_data = heatmap_data.sort_index()
+
+    plt.figure(figsize=figsize)
+    ax = sns.heatmap(heatmap_data, annot=True, fmt=".1f", cmap="coolwarm", cbar_kws={"label": cbar_label})
+
+    ax.set_title(title)
+    ax.set_xlabel("Distribution")
+    ax.set_ylabel("Application")
+    ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha="right")
+    ax.set_yticklabels(ax.get_yticklabels(), rotation=0)
+
+    plt.tight_layout()
+    plt.show()
