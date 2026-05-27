@@ -141,6 +141,9 @@ analysis/processed_data/
 *.pkl
 *.msgpack
 
+analysis/plot_figures/
+*.pdf
+
 adapters/cavia/dump_scenarios/
 *.json
 
